@@ -17,11 +17,13 @@
   .hint{color:var(--sub);font-size:14px}
   .progress{height:8px;border-radius:999px;background:var(--mut);overflow:hidden}
   .bar{height:100%;width:0;background:linear-gradient(90deg,var(--pri),var(--pri2));transition:width .25s}
+
   .card{background:var(--card);border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.06);padding:28px}
   .grid{display:grid;gap:16px}
   .q-emoji{font-size:56px;margin-bottom:8px;text-align:center}
   .chip{display:inline-block;background:var(--chip);color:#3730a3;font-weight:700;border-radius:999px;padding:6px 12px;margin-bottom:12px;font-size:12px}
   .qtext{font-size:22px;line-height:1.5;text-align:center;margin:0 0 8px}
+
   .btn{border:0;border-radius:14px;padding:14px 16px;font-weight:700;color:#fff;cursor:pointer}
   .opt{width:100%}
   .opt1{background:linear-gradient(90deg,#22c55e,#059669)}
@@ -29,25 +31,31 @@
   .opt3{background:linear-gradient(90deg,#8b5cf6,#6366f1)}
   .opt4{background:linear-gradient(90deg,#f59e0b,#f97316)}
   .opt5{background:linear-gradient(90deg,#ef4444,#fb7185)}
+
   .actions{display:flex;justify-content:space-between;margin-top:18px}
   .ghost{background:#111;color:#fff;border-radius:14px;padding:12px 18px}
   .muted{color:var(--sub);font-size:12px;text-align:center;margin-top:18px}
-  /* 결과 */
-  .result-head{text-align:center;margin:0 0 6px;font-size:28px;font-weight:800}
-  .result-sub{color:var(--sub);text-align:center;margin:0 0 16px}
+
+  /* ===== 결과 페이지 강화 ===== */
+  .result-head{ text-align:center; margin:0 0 6px; font-size:36px; font-weight:900; letter-spacing:-.02em; }
+  .result-sub{ color:var(--sub); text-align:center; margin:0 0 18px; font-size:18px; }
   .hero{display:grid;grid-template-columns:1fr;gap:18px;align-items:center}
-  .hero.withImage{grid-template-columns:420px 1fr}
-  .hero img{width:100%;max-width:520px;aspect-ratio:1/1;object-fit:contain;display:block;margin:0 auto}
-  .score{background:#f9fafb;border-radius:16px;padding:16px}
-  .score-row{margin-bottom:10px}
-  .score-bar{height:8px;border-radius:999px;background:var(--mut);overflow:hidden}
-  .score-fill{height:100%;border-radius:999px}
-  .subtle{color:var(--sub)}
-  .list{margin:0;padding:0 0 0 16px}
-  .pill{display:inline-block;background:#111;color:#fff;padding:6px 10px;border-radius:999px;font-size:12px;margin-right:8px}
+  .hero.withImage{grid-template-columns:340px 1fr}
+  .hero img{width:100%;max-width:340px;aspect-ratio:1/1;object-fit:contain;display:block;margin:0 auto}
+  .ai-note{font-size:12px;opacity:.65;margin-top:6px}
+
+  .section-title{font-size:20px;font-weight:900;margin-bottom:10px}
   .recommend{background:linear-gradient(90deg,#6366f1,#a855f7);color:#fff;border-radius:16px;padding:18px}
+  .recommend .big{font-size:22px;font-weight:900;margin-bottom:6px}
+  .list{margin:0;padding:0 0 0 18px;font-size:16px;line-height:1.6}
+  .subtle{color:var(--sub)}
+  .score{background:#f9fafb;border-radius:16px;padding:16px}
+  .score-row{margin-bottom:12px}
+  .score-bar{height:10px;border-radius:999px;background:var(--mut);overflow:hidden}
+  .score-fill{height:100%;border-radius:999px}
+  .pill{display:inline-block;background:#111;color:#fff;padding:7px 12px;border-radius:999px;font-size:13px;margin-right:8px}
   .fullwidth{margin-top:16px;display:grid;gap:16px}
-  .hide{display:none !important}
+  .hide{display:none!important}
 </style>
 </head>
 <body>
@@ -83,8 +91,8 @@
       E:{name:'진취형', color:'#f59e0b'}, C:{name:'관습형', color:'#6b7280'}, T:{name:'탐구형', color:'#7c3aed'}
     };
 
-    /* 질문 (원문 36문항) */
-    const questions=[ /* …(생략 없이 동일, 기존 코드와 같음)… */ 
+    /* 36문항 (기존 그대로) */
+    const questions=[ /* …중략: 기존 배열 36개 항목을 그대로 사용… */ 
       {id:1,type:'R',text:'3D 프린터나 로봇과 같은 기계를 조작하여 결과물을 만드는 활동에 흥미를 느낀다.',emoji:'🔧',character:'미래 엔지니어'},
       {id:2,type:'R',text:'직접 물을 주며 야외에서 식물을 기르거나 동물을 돌보는 활동을 즐긴다.',emoji:'🌾',character:'바이오 전문가'},
       {id:3,type:'R',text:'복잡하게 쌓인 장난감이나 기계 장치의 퍼즐을 맞추며 해결하는 것에 흥미가 있다.',emoji:'🔩',character:'메카닉 마스터'},
@@ -123,25 +131,25 @@
       {id:36,type:'C',text:'새로운 자동화 도구나 업무 관리 시스템을 도입하여 효율성을 높이는 방법을 찾는다.',emoji:'⚙️',character:'업무 효율화 전문가'}
     ];
 
-    /* 조합/기본 추천 */
-    const careerPaths={ /* 기존 + RS 추가 (동일) */ 
-      IA:{title:'AI 기반 콘텐츠 크리에이터',jobs:['데이터 시각화 디자이너','UX 리서치','미디어 아티스트','AI 아트 디렉터'],roadmap:{high:'미술, 정보, 미디어 교과 선택',college:'융합디자인, 데이터사이언스, 미디어 커뮤니케이션 전공',experience:'UI/UX 공모전, 포트폴리오 제작'},skills:['창의적 문제해결','데이터 리터러시','디자인 사고'],growth:85},
-      IE:{title:'AI 스타트업 전략가',jobs:['AI 기획자','테크 PM','비즈니스 애널리스트','디지털 컨설턴트'],roadmap:{high:'수학, 컴퓨터과학, 경제',college:'경영경제/컴퓨터/산업공학',experience:'창업 동아리, 케이스 컴프'},skills:['논리적 사고','시장 분석','커뮤니케이션'],growth:92},
-      AI:{title:'AI 엔지니어 겸 UX디자이너',jobs:['ML 리서처','챗봇 개발자','데이터 시각화','AI 인터랙션'],roadmap:{high:'수학, 과학, 정보',college:'컴공/AI/통계',experience:'코딩 대회, AI 프로젝트'},skills:['알고리즘','수학적 사고','창의적 해결'],growth:78},
-      SE:{title:'소셜 임팩트 리더',jobs:['사회적기업가','CSR 매니저','임팩트 투자'],roadmap:{high:'사회문화, 윤리, 경제',college:'사회복지/경영/국제개발',experience:'봉사, 사회적경제 동아리'},skills:['공감','리더십','문제해결'],growth:73},
-      RI:{title:'첨단 로봇 엔지니어',jobs:['로봇공학자','IoT 개발자','바이오 엔지니어'],roadmap:{high:'물리, 화학, 정보',college:'기계/전자/로봇',experience:'메이커/로봇 대회'},skills:['공학','설계','프로그래밍'],growth:88},
-      IT:{title:'인간 중심 연구자',jobs:['심리학자','교육 연구원','신경과학자','UX 리서치'],roadmap:{high:'심리학, 사회문화, 생명과학',college:'심리/교육/인지과학',experience:'심리 실험/사회 조사'},skills:['논리','공감','연구 설계'],growth:76},
-      IC:{title:'데이터 사이언티스트',jobs:['데이터 애널리스트','통계전문가','정량분석가'],roadmap:{high:'수학, 정보, 경제',college:'통계/수학/정보사회',experience:'데이터톤/리서치'},skills:['통계','프로그래밍','비즈니스 이해'],growth:95},
-      AS:{title:'예술 치료 전문가',jobs:['음악/미술 치료사','문화기획자'],roadmap:{high:'음악, 미술, 심리',college:'예술치료/문예창작/심리',experience:'예술 봉사/커뮤니티'},skills:['창의성','공감','정서 표현'],growth:71},
-      AC:{title:'디지털 아카이브 전문가',jobs:['큐레이터','디지털 아카이비스트','콘텐츠 에디터'],roadmap:{high:'미술, 역사, 정보',college:'문화콘텐츠/박물관/문헌정보',experience:'전시·아카이빙'},skills:['정보학','패턴 인식','창의성'],growth:68},
-      SC:{title:'헬스케어 서비스 관리자',jobs:['공공기관 관리자','헬스케어 매니저'],roadmap:{high:'사회문화, 생명과학, 정보',college:'보건행정/사회복지/경영',experience:'의료봉사/서비스 기획'},skills:['소통','체계적 관리','문제 해결'],growth:82},
-      RA:{title:'메이커 크리에이터',jobs:['제품 디자이너','3D 모델러','건축/인테리어'],roadmap:{high:'미술, 기술, 정보',college:'산디/기계/건축',experience:'모형 제작·메이커'},skills:['디자인','수리','제품 분석'],growth:82},
-      EC:{title:'글로벌 무역 관리자',jobs:['국제 무역인','영업 관리자','글로벌 마케터'],roadmap:{high:'사회문화, 경제, 영어',college:'국제통상/경영/국제관계',experience:'무역 프로그램/교환학생'},skills:['협상력','국제 감각','분석'],growth:79},
-      RS:{title:'현장 서비스/공공안전 전문가',jobs:['응급구조·소방 공무원','보건의료 기술직','설비/안전관리자','재난 대응 코디네이터'],roadmap:{high:'생명과학, 보건, 기술·가정',college:'보건행정/응급구조/산업안전',experience:'의료·안전 봉사, 현장 실습'},skills:['대인 공감','현장 문제해결','기술 숙련'],growth:80}
+    /* 추천 매핑(조합 없을 때는 단일형에서 합성) */
+    const careerPaths={
+      IA:{title:'AI 기반 콘텐츠 크리에이터',jobs:['데이터 시각화 디자이너','UX 리서치','미디어 아티스트','AI 아트 디렉터'],roadmap:{high:'미술, 정보, 미디어',college:'융합디자인/데이터사이언스/미디어',experience:'UI·UX 공모전, 포트폴리오'},skills:['창의적 문제해결','데이터 리터러시','디자인 사고'],growth:85},
+      IE:{title:'AI 스타트업 전략가',jobs:['AI 기획자','테크 PM','비즈니스 애널리스트','디지털 컨설턴트'],roadmap:{high:'수학·컴퓨터·경제',college:'경영경제/컴퓨터/산업공학',experience:'창업동아리·케이스컴프'},skills:['논리적 사고','시장 분석','커뮤니케이션'],growth:92},
+      AI:{title:'AI 엔지니어 겸 UX디자이너',jobs:['ML 리서처','챗봇 개발자','데이터 시각화','AI 인터랙션'],roadmap:{high:'수학·과학·정보',college:'컴공/AI/통계',experience:'코딩대회·AI 프로젝트'},skills:['알고리즘','수학적 사고','창의적 해결'],growth:78},
+      SE:{title:'소셜 임팩트 리더',jobs:['사회적기업가','CSR 매니저','임팩트 투자'],roadmap:{high:'사회문화·윤리·경제',college:'사회복지/경영/국제개발',experience:'봉사·사회적경제 동아리'},skills:['공감','리더십','문제해결'],growth:73},
+      RI:{title:'첨단 로봇 엔지니어',jobs:['로봇공학자','IoT 개발자','바이오 엔지니어'],roadmap:{high:'물리·화학·정보',college:'기계/전자/로봇',experience:'메이커/로봇 대회'},skills:['공학','설계','프로그래밍'],growth:88},
+      IT:{title:'인간 중심 연구자',jobs:['심리학자','교육 연구원','신경과학자','UX 리서치'],roadmap:{high:'심리·사회문화·생명과학',college:'심리/교육/인지과학',experience:'심리 실험·사회 조사'},skills:['논리','공감','연구 설계'],growth:76},
+      IC:{title:'데이터 사이언티스트',jobs:['데이터 애널리스트','통계전문가','정량분석가'],roadmap:{high:'수학·정보·경제',college:'통계/수학/정보사회',experience:'데이터톤/리서치'},skills:['통계','프로그래밍','비즈니스 이해'],growth:95},
+      AS:{title:'예술 치료 전문가',jobs:['음악/미술 치료사','문화기획자'],roadmap:{high:'음악·미술·심리',college:'예술치료/문예창작/심리',experience:'예술 봉사·커뮤니티'},skills:['창의성','공감','정서 표현'],growth:71},
+      AC:{title:'디지털 아카이브 전문가',jobs:['큐레이터','디지털 아카이비스트','콘텐츠 에디터'],roadmap:{high:'미술·역사·정보',college:'문화콘텐츠/박물관/문헌정보',experience:'전시·아카이빙'},skills:['정보학','패턴 인식','창의성'],growth:68},
+      SC:{title:'헬스케어 서비스 관리자',jobs:['공공기관 관리자','헬스케어 매니저'],roadmap:{high:'사회문화·생명과학·정보',college:'보건행정/사회복지/경영',experience:'의료봉사·서비스 기획'},skills:['소통','체계적 관리','문제 해결'],growth:82},
+      RA:{title:'메이커 크리에이터',jobs:['제품 디자이너','3D 모델러','건축/인테리어'],roadmap:{high:'미술·기술·정보',college:'산디/기계/건축',experience:'모형 제작·메이커'},skills:['디자인','수리','제품 분석'],growth:82},
+      EC:{title:'글로벌 무역 관리자',jobs:['국제 무역인','영업 관리자','글로벌 마케터'],roadmap:{high:'사회문화·경제·영어',college:'국제통상/경영/국제관계',experience:'무역 프로그램·교환학생'},skills:['협상력','국제 감각','분석'],growth:79},
+      RS:{title:'현장 서비스/공공안전 전문가',jobs:['응급구조·소방','보건의료 기술직','설비/안전관리','재난 대응'],roadmap:{high:'생명과학·보건·기술가정',college:'보건행정/응급구조/산업안전',experience:'의료·안전 봉사, 실습'},skills:['대인 공감','현장 해결','기술 숙련'],growth:80}
     };
 
     const singleTypeSuggest={
-      R:{title:'현장 기술 전문가',jobs:['설비·정비 기술자','품질관리','안전/산업기사'],roadmap:{high:'물리/화학/정보',college:'기계/전기/산업안전',experience:'메이커/현장 실습'},skills:['수리 능력','실행력','문제 해결'],growth:78},
+      R:{title:'현장 기술 전문가',jobs:['설비·정비 기술자','품질관리','안전·산업기사'],roadmap:{high:'물리/화학/정보',college:'기계/전기/산업안전',experience:'메이커/현장 실습'},skills:['수리 능력','실행력','문제 해결'],growth:78},
       I:{title:'연구·분석 전문가',jobs:['연구원','데이터 분석','품질분석'],roadmap:{high:'수학/과학/정보',college:'공학/통계/자연과학',experience:'리서치/데이터톤'},skills:['분석','논리','실험 설계'],growth:80},
       A:{title:'크리에이티브 메이커',jobs:['콘텐츠 디자이너','영상/사운드 제작'],roadmap:{high:'미술/음악/정보',college:'디자인/콘텐츠',experience:'포트폴리오/공모전'},skills:['창의성','표현력','도구 활용'],growth:72},
       S:{title:'교육·상담·커뮤니티 전문가',jobs:['상담/교육','사회복지','코디네이터'],roadmap:{high:'사회/윤리/국어',college:'교육/심리/사회복지',experience:'봉사/멘토링'},skills:['공감','의사소통','협업'],growth:76},
@@ -159,8 +167,7 @@
 
     function renderQuestion(){
       const q=questions[idx];
-      const progress=Math.round(((idx+1)/questions.length)*100);
-      bar.style.width=progress+'%';
+      bar.style.width=Math.round(((idx+1)/questions.length)*100)+'%';
       countText.textContent=`${idx+1} / ${questions.length}`;
       nextBtn.textContent='다음 →';
       prevBtn.classList.toggle('hide', idx===0);
@@ -193,14 +200,12 @@
       answers.forEach(a=>scores[a.type]+=a.value);
       const ordered=Object.entries(scores).sort(([,a],[,b])=>b-a);
       const top2=ordered.filter(([t])=>t!=='T').slice(0,2).map(([t])=>t);
-      const code=top2.join('');
-      const flip=top2.slice().reverse().join('');
+      const code=top2.join(''); const flip=top2.slice().reverse().join('');
       return {scores, top2, code, flip};
     }
 
     function synthesizeCareer(top2){
-      const [t1,t2]=top2;
-      const s1=singleTypeSuggest[t1], s2=singleTypeSuggest[t2];
+      const [t1,t2]=top2; const s1=singleTypeSuggest[t1], s2=singleTypeSuggest[t2];
       return {
         title:`${typeInfo[t1].name}×${typeInfo[t2].name} 융합 진로`,
         jobs:[...(s1?.jobs||[]),(s2?.jobs||[])].flat().slice(0,4),
@@ -210,7 +215,7 @@
           experience:[s1?.roadmap?.experience,s2?.roadmap?.experience].filter(Boolean).join(' / ')
         },
         skills:[...(s1?.skills||[]),(s2?.skills||[])].flat().slice(0,3),
-        growth:Math.round(((singleTypeSuggest[top2[0]]?.growth||75)+(singleTypeSuggest[top2[1]]?.growth||75))/2)
+        growth:Math.round(((s1?.growth||75)+(s2?.growth||75))/2)
       };
     }
 
@@ -227,7 +232,8 @@
       prevBtn.classList.add('hide');
 
       const career = careerPaths[code] || careerPaths[flip] || synthesizeCareer(top2);
-      const showImageSrc = pickImage(careerPaths[code]||careerPaths[flip] ? (careerPaths[code]?code:flip) : code, top2);
+      const showCode = (careerPaths[code]||careerPaths[flip]) ? (careerPaths[code]?code:flip) : code;
+      const showImageSrc = pickImage(showCode, top2);
 
       const scoreRows=Object.entries(scores)
         .filter(([t])=>t!=='T')
@@ -248,24 +254,28 @@
       app.innerHTML=`
         <div class="card">
           <h2 class="result-head">설문 결과</h2>
-          <div class="result-sub">당신의 유형: <strong style="color:var(--pri)">${top2.join('')}</strong></div>
+          <div class="result-sub">당신의 유형: <strong style="color:var(--pri);font-size:20px">${top2.join('')}</strong></div>
 
           <div class="hero ${showImageSrc ? 'withImage' : ''}">
-            ${showImageSrc ? `<div class="center"><img src="${showImageSrc}" alt="추천 직군 캐릭터" onerror="this.style.display='none'"></div>` : ''}
+            ${showImageSrc ? `
+              <div class="center">
+                <img src="${showImageSrc}" alt="추천 직군 캐릭터" onerror="this.style.display='none'">
+                <div class="ai-note">AI로 생성된 이미지입니다.</div>
+              </div>` : ''}
+
             <div class="grid">
               <div class="recommend">
-                <div style="font-weight:800;font-size:18px;margin-bottom:6px">추천 진로 · 성장 전망 ${career.growth}%</div>
-                <div style="opacity:.85">${career.title}</div>
-                <div style="opacity:.7;margin-top:6px">AI로 생성된 이미지입니다.</div>
+                <div class="big">추천 진로 · 성장 전망 ${career.growth}%</div>
+                <div style="font-size:18px">${career.title}</div>
               </div>
 
               <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:16px">
                 <div class="score">
-                  <div style="font-weight:800;margin-bottom:8px">관련 직업</div>
+                  <div class="section-title">관련 직업</div>
                   <ul class="list">${career.jobs.map(j=>`<li>${j}</li>`).join('')}</ul>
                 </div>
                 <div class="score">
-                  <div style="font-weight:800;margin-bottom:8px">필요 역량</div>
+                  <div class="section-title">필요 역량</div>
                   <ul class="list">${career.skills.map(s=>`<li>${s}</li>`).join('')}</ul>
                 </div>
               </div>
@@ -274,7 +284,7 @@
 
           <div class="fullwidth">
             <div class="card">
-              <div style="font-weight:800;margin-bottom:8px">진로 로드맵</div>
+              <div class="section-title">진로 로드맵</div>
               <ul class="list">
                 <li><strong>고등학교:</strong> ${career.roadmap.high}</li>
                 <li><strong>대학:</strong> ${career.roadmap.college}</li>
@@ -283,7 +293,7 @@
             </div>
 
             <div class="card">
-              <div style="font-weight:800;margin-bottom:8px">유형별 점수</div>
+              <div class="section-title">유형별 점수</div>
               ${scoreRows}
             </div>
           </div>
@@ -295,8 +305,7 @@
     prevBtn.addEventListener('click', ()=>{ if(idx>0){ idx--; answers.pop(); renderQuestion(); } });
     nextBtn.addEventListener('click', ()=>{
       if(nextBtn.textContent.includes('다시 시작')){ resetSurvey(); return; }
-      if(idx<questions.length-1){ idx++; renderQuestion(); }
-      else{ renderResult(); }
+      if(idx<questions.length-1){ idx++; renderQuestion(); } else { renderResult(); }
     });
     window.addEventListener('keydown', e=>{
       if(nextBtn.textContent.includes('다시 시작')) return;
