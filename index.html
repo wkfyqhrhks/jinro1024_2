@@ -7,11 +7,11 @@
   <style>
     :root{
       --bg:#f7f7f8; --card:#ffffff; --ink:#16181d; --sub:#6b7280;
-      --pri:#7c3aed; --pri2:#ec4899; --ok:#10b981; --mut:#e5e7eb;
-      --chip:#eef2ff;
+      --pri:#7c3aed; --pri2:#ec4899; --mut:#e5e7eb;
+      --chip:#eef2ff; --ok:#10b981;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;background:var(--bg);color:var(--ink);font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif}
+    html,body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif}
     .wrap{max-width:960px;margin:0 auto;padding:24px}
     .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
     .title{font-weight:800;font-size:20px}
@@ -34,21 +34,28 @@
     .actions{display:flex;justify-content:space-between;margin-top:18px}
     .ghost{background:#111;color:#fff;border-radius:14px;padding:12px 18px}
     .muted{color:var(--sub);font-size:12px;text-align:center;margin-top:18px}
-    /* 결과 */
+    /* 결과 레이아웃 */
+    .result-head{text-align:center;margin:0 0 6px;font-size:28px;font-weight:800}
+    .result-sub{color:var(--sub);text-align:center;margin:0 0 16px}
     .hero{display:grid;grid-template-columns:1fr;gap:18px;align-items:center}
     .hero img{width:100%;max-width:520px;aspect-ratio:1/1;object-fit:contain;display:block;margin:0 auto}
+    @media (min-width:920px){
+      .hero{grid-template-columns:420px 1fr}
+    }
     .score{background:#f9fafb;border-radius:16px;padding:16px}
     .score-row{margin-bottom:10px}
     .score-row:last-child{margin-bottom:0}
     .score-bar{height:8px;border-radius:999px;background:var(--mut);overflow:hidden}
-    .score-fill{height:100%;background:#111;border-radius:999px}
-    @media (min-width:920px){
-      .hero{grid-template-columns:420px 1fr}
-    }
+    .score-fill{height:100%;border-radius:999px}
     .subtle{color:var(--sub)}
     .list{margin:0;padding:0 0 0 16px}
     .pill{display:inline-block;background:#111;color:#fff;padding:6px 10px;border-radius:999px;font-size:12px;margin-right:8px}
     .recommend{background:linear-gradient(90deg,#6366f1,#a855f7);color:#fff;border-radius:16px;padding:18px}
+    /* 하단 전폭 섹션 */
+    .fullwidth{margin-top:16px;display:grid;gap:16px}
+    .fullwidth > .card{padding:18px}
+    .reset{display:inline-flex;gap:8px;align-items:center;background:#111;color:#fff;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+    .hide{display:none !important}
   </style>
 </head>
 <body>
@@ -68,108 +75,104 @@
     <div id="app" class="grid"></div>
 
     <div class="actions">
-      <button id="prevBtn" class="ghost">← 이전</button>
-      <button id="nextBtn" class="ghost">다음 →</button>
+      <button id="prevBtn" class="ghost" type="button">← 이전</button>
+      <button id="nextBtn" class="ghost" type="button">다음 →</button>
     </div>
 
     <div class="muted">스와이프(모바일) · 방향키(←/→) 지원</div>
   </div>
 
   <script>
-    // 1) 캐릭터 PNG 매핑 (파일명은 대소문자 포함 그대로)
-const careerImages = {
-  AI: "assets/AI.png",
-  IA: "assets/IA.png",
-  IE: "assets/IE.png",
-  RI: "assets/RI.png",
-  IT: "assets/IT.png",
-  IC: "assets/IC.png",
-  AS: "assets/AS.png",
-  AC: "assets/AC.png",
-  SC: "assets/SC.png",
-  RA: "assets/RA.png",
-  EC: "assets/EC.png",
-  SE: "assets/SE.png"
-};
-    // 2) 타입 메타
-    const typeInfo = {
-      R: { name: '실재형', subtitle: 'Doers', color: '#2563eb' },
-      I: { name: '탐구형', subtitle: 'Thinkers', color: '#7c3aed' },
-      A: { name: '예술형', subtitle: 'Creators', color: '#ec4899' },
-      S: { name: '사회형', subtitle: 'Helpers', color: '#10b981' },
-      E: { name: '진취형', subtitle: 'Persuaders', color: '#f59e0b' },
-      C: { name: '관습형', subtitle: 'Organizers', color: '#6b7280' },
-      T: { name: '탐구형', subtitle: 'Thinker', color: '#7c3aed' },
+    /* 1) 결과 캐릭터 PNG 경로 (대소문자 정확히) */
+    const careerImages = {
+      AI:"assets/AI.png", IA:"assets/IA.png", IE:"assets/IE.png", RI:"assets/RI.png",
+      IT:"assets/IT.png", IC:"assets/IC.png", AS:"assets/AS.png", AC:"assets/AC.png",
+      SC:"assets/SC.png", RA:"assets/RA.png", EC:"assets/EC.png", SE:"assets/SE.png"
     };
 
-    // 3) 질문(36문항) — 그대로 사용
+    /* 2) 타입 메타 */
+    const typeInfo = {
+      R:{name:'실재형',subtitle:'Doers',color:'#2563eb'},
+      I:{name:'탐구형',subtitle:'Thinkers',color:'#7c3aed'},
+      A:{name:'예술형',subtitle:'Creators',color:'#ec4899'},
+      S:{name:'사회형',subtitle:'Helpers',color:'#10b981'},
+      E:{name:'진취형',subtitle:'Persuaders',color:'#f59e0b'},
+      C:{name:'관습형',subtitle:'Organizers',color:'#6b7280'},
+      T:{name:'탐구형',subtitle:'Thinker',color:'#7c3aed'}
+    };
+
+    /* 3) 36문항 */
     const questions = [
-      { id: 1, type: 'R', text: '3D 프린터나 로봇과 같은 기계를 조작하여 결과물을 만드는 활동에 흥미를 느낀다.', emoji: '🔧', character: '미래 엔지니어' },
-      { id: 2, type: 'R', text: '직접 물을 주며 야외에서 식물을 기르거나 동물을 돌보는 활동을 즐긴다.', emoji: '🌾', character: '바이오 전문가' },
-      { id: 3, type: 'R', text: '복잡하게 쌓인 장난감이나 기계 장치의 퍼즐을 맞추며 해결하는 것에 흥미가 있다.', emoji: '🔩', character: '메카닉 마스터' },
-      { id: 4, type: 'I', text: '새로운 과학 실험이나 연구 결과를 접하면 그 원리를 탐구하고 싶다.', emoji: '🔬', character: '과학 탐구자' },
-      { id: 5, type: 'I', text: '궁금한 것이 생기면 반드시 질문하고 답을 찾아 오랫동안 연구하는 편이다.', emoji: '🔍', character: '지식 탐험가' },
-      { id: 6, type: 'R', text: '가상현실(VR) 장비로 이용해 기계 작동 시뮬레이션을 경험하는 것이 좋다.', emoji: '🕹️', character: 'VR 트레이너' },
-      { id: 7, type: 'I', text: '수업은 데이터나 통계 자료를 분석하여 숨겨진 규칙이나 의미를 찾아내는 것에 흥미가 있다.', emoji: '📊', character: '빅데이터 분석가' },
-      { id: 8, type: 'T', text: '인간의 심리, 뇌 과학 등 복잡한 인성의 원리를 깊이 있게 연구하고 싶다.', emoji: '🧠', character: '심리 과학자' },
-      { id: 9, type: 'A', text: '그림, 음악, 연기 등 창의적인 방식으로 나의 생각을 자유롭게 표현하는 것이 즐겁다.', emoji: '🎨', character: '아티스트' },
-      { id: 10, type: 'A', text: '새로운 노래나 공연을 기획하거나 직접 참여하는 활동을 즐겁게 한다.', emoji: '🎭', character: '크리에이터' },
-      { id: 11, type: 'I', text: '미래 사회의 변화나 우주의 신비 등 미지의 영역에 대해 끊임없이 질문을 던진다.', emoji: '✨', character: '미래학자' },
-      { id: 12, type: 'T', text: '복잡한 논리 게임이나 추리 소설을 읽으며 정보를 조합하고 결론을 도출하는 활동을 좋아한다.', emoji: '🔍', character: '논리학자' },
-      { id: 13, type: 'A', text: '그림, 음악, 글쓰기 등 창의적인 방법으로 나의 생각이나 감정을 표현하는 것을 좋아한다.', emoji: '🎨', character: '멀티 아티스트' },
-      { id: 14, type: 'A', text: '디지털 드로잉이나 미디어 아트 등 새로운 기술을 활용한 예술 활동에 관심이 많다.', emoji: '💻', character: '미디어 아티스트' },
-      { id: 15, type: 'A', text: '영상 편집, 웹툰 제작, 게임 스토리 기획 등 현대 콘텐츠를 만드는 일을 하고 싶다.', emoji: '🎬', character: '콘텐츠 크리에이터' },
-      { id: 16, type: 'A', text: '영화, 패션, 공연 디자인 등 창의적인 프로젝트를 기획하고 실현하고 싶다.', emoji: '🌟', character: '프로듀서' },
-      { id: 17, type: 'S', text: '친구들 사이에서 갈등이나 문제가 생기면 중재하고 조화를 이루도록 돕는 역할을 자주 맡는다.', emoji: '🤝', character: '갈등 중재자' },
-      { id: 18, type: 'S', text: '누군가 어려움에 처한 것을 보면 적극적으로 도움을 제공하거나 문제를 해결해주는 일에 보람을 느낀다.', emoji: '💝', character: '사회 봉사가' },
-      { id: 19, type: 'S', text: '취약 계층이나 도움이 필요한 사람들을 위해 봉사하고 문제를 해결해주는 일에 보람을 느낀다.', emoji: '🏥', character: '사회 봉사가' },
-      { id: 20, type: 'S', text: '친구들의 고민을 들어주고 공감하여 지지를 베푸는 역할이 편안하다.', emoji: '💬', character: '심리 상담가' },
-      { id: 21, type: 'S', text: '다른 사람에게 새로운 지식이나 기술을 재미있고 효과적으로 가르치는 일을 잘한다.', emoji: '👩‍🏫', character: '교육자' },
-      { id: 22, type: 'E', text: '사람들을 설득하거나 특정 목표를 향해 단체를 이끄는 리더 역할을 맡는 것이 재미있다.', emoji: '📣', character: '리더십 개발자' },
-      { id: 23, type: 'S', text: '의료인 지원 활동을 운영하며 사람들의 의견을 모으고 갈등을 조정하는 역할을 즐긴다.', emoji: '📋', character: '커뮤니티 매니저' },
-      { id: 24, type: 'S', text: '온라인 커뮤니티를 운영하며 사람들의 의견을 모으고 갈등을 조정하는 역할을 즐긴다.', emoji: '💬', character: '글로벌 컨설턴트' },
-      { id: 25, type: 'E', text: '새로운 사업 아이디어나 제품을 기획하고 사람들에게 소개하여 구매를 권유하는 일을 잘한다.', emoji: '💡', character: '스타트업 CEO' },
-      { id: 26, type: 'E', text: '팀 프로젝트에서 리더 역할을 맡아 사람들에게 동기를 부여하고 이끄는 것을 좋아한다.', emoji: '🔥', character: '카리스마 리더' },
-      { id: 27, type: 'E', text: '친구들과 함께 모임을 조직하거나 이벤트를 기획하여 사람들을 즐겁게 하는 것을 즐긴다.', emoji: '🎉', character: '이벤트 플래너' },
-      { id: 28, type: 'C', text: '복잡한 정보를 정리하여 체계적인 표나 파일로 정리하는 작업에 만족감을 느낀다.', emoji: '📊', character: '데이터 정리자' },
-      { id: 29, type: 'E', text: '글로벌 시장의 트렌드를 파악하고 새로운 비즈니스 기회를 찾아내는 일을 하고 싶다.', emoji: '🌐', character: '국제 비즈니스맨' },
-      { id: 30, type: 'E', text: '개인 브랜딩을 구축하거나 소셜 미디어를 통해 나의 영향력을 키우는 활동을 즐긴다.', emoji: '📱', character: '인플루언서' },
-      { id: 31, type: 'C', text: '복잡한 서류나 대규모 데이터베이스를 분류하고 체계적으로 관리하는 일에 능숙하다.', emoji: '📊', character: '정보 관리자' },
-      { id: 32, type: 'C', text: '정해진 규칙과 절차에 따라 일을 완벽하게 처리하는 데 만족감과 안도감을 느낀다.', emoji: '✅', character: '행정 전문가' },
-      { id: 33, type: 'C', text: '재무 현황을 분석하고 예산 계획을 세우는 등의 간단한 수치를 다루는 일이 좋다.', emoji: '💰', character: '회계사' },
-      { id: 34, type: 'C', text: '물품 보관이나 정리 작업을 체계적으로 진행하고 효율성을 높이는 데 능숙하다.', emoji: '📦', character: '물류 관리자' },
-      { id: 35, type: 'C', text: '꼼꼼하고 정확한 업무 수행이 요구되는 일을 신속하게 처리할 수 있는 자신이 있다.', emoji: '✍️', character: '사무 전문가' },
-      { id: 36, type: 'C', text: '새로운 자동화 도구나 업무 관리 시스템을 도입하여 효율성을 높이는 방법을 찾는다.', emoji: '⚙️', character: '업무 효율화 전문가' }
+      { id:1, type:'R', text:'3D 프린터나 로봇과 같은 기계를 조작하여 결과물을 만드는 활동에 흥미를 느낀다.', emoji:'🔧', character:'미래 엔지니어' },
+      { id:2, type:'R', text:'직접 물을 주며 야외에서 식물을 기르거나 동물을 돌보는 활동을 즐긴다.', emoji:'🌾', character:'바이오 전문가' },
+      { id:3, type:'R', text:'복잡하게 쌓인 장난감이나 기계 장치의 퍼즐을 맞추며 해결하는 것에 흥미가 있다.', emoji:'🔩', character:'메카닉 마스터' },
+      { id:4, type:'I', text:'새로운 과학 실험이나 연구 결과를 접하면 그 원리를 탐구하고 싶다.', emoji:'🔬', character:'과학 탐구자' },
+      { id:5, type:'I', text:'궁금한 것이 생기면 반드시 질문하고 답을 찾아 오랫동안 연구하는 편이다.', emoji:'🔍', character:'지식 탐험가' },
+      { id:6, type:'R', text:'가상현실(VR) 장비로 이용해 기계 작동 시뮬레이션을 경험하는 것이 좋다.', emoji:'🕹️', character:'VR 트레이너' },
+      { id:7, type:'I', text:'수업은 데이터나 통계 자료를 분석하여 숨겨진 규칙이나 의미를 찾아내는 것에 흥미가 있다.', emoji:'📊', character:'빅데이터 분석가' },
+      { id:8, type:'T', text:'인간의 심리, 뇌 과학 등 복잡한 인성의 원리를 깊이 있게 연구하고 싶다.', emoji:'🧠', character:'심리 과학자' },
+      { id:9, type:'A', text:'그림, 음악, 연기 등 창의적인 방식으로 나의 생각을 자유롭게 표현하는 것이 즐겁다.', emoji:'🎨', character:'아티스트' },
+      { id:10, type:'A', text:'새로운 노래나 공연을 기획하거나 직접 참여하는 활동을 즐겁게 한다.', emoji:'🎭', character:'크리에이터' },
+      { id:11, type:'I', text:'미래 사회의 변화나 우주의 신비 등 미지의 영역에 대해 끊임없이 질문을 던진다.', emoji:'✨', character:'미래학자' },
+      { id:12, type:'T', text:'복잡한 논리 게임이나 추리 소설을 읽으며 정보를 조합하고 결론을 도출하는 활동을 좋아한다.', emoji:'🔍', character:'논리학자' },
+      { id:13, type:'A', text:'그림, 음악, 글쓰기 등 창의적인 방법으로 나의 생각이나 감정을 표현하는 것을 좋아한다.', emoji:'🎨', character:'멀티 아티스트' },
+      { id:14, type:'A', text:'디지털 드로잉이나 미디어 아트 등 새로운 기술을 활용한 예술 활동에 관심이 많다.', emoji:'💻', character:'미디어 아티스트' },
+      { id:15, type:'A', text:'영상 편집, 웹툰 제작, 게임 스토리 기획 등 현대 콘텐츠를 만드는 일을 하고 싶다.', emoji:'🎬', character:'콘텐츠 크리에이터' },
+      { id:16, type:'A', text:'영화, 패션, 공연 디자인 등 창의적인 프로젝트를 기획하고 실현하고 싶다.', emoji:'🌟', character:'프로듀서' },
+      { id:17, type:'S', text:'친구들 사이에서 갈등이나 문제가 생기면 중재하고 조화를 이루도록 돕는 역할을 자주 맡는다.', emoji:'🤝', character:'갈등 중재자' },
+      { id:18, type:'S', text:'누군가 어려움에 처한 것을 보면 적극적으로 도움을 제공하거나 문제를 해결해주는 일에 보람을 느낀다.', emoji:'💝', character:'사회 봉사가' },
+      { id:19, type:'S', text:'취약 계층이나 도움이 필요한 사람들을 위해 봉사하고 문제를 해결해주는 일에 보람을 느낀다.', emoji:'🏥', character:'사회 봉사가' },
+      { id:20, type:'S', text:'친구들의 고민을 들어주고 공감하여 지지를 베푸는 역할이 편안하다.', emoji:'💬', character:'심리 상담가' },
+      { id:21, type:'S', text:'다른 사람에게 새로운 지식이나 기술을 재미있고 효과적으로 가르치는 일을 잘한다.', emoji:'👩‍🏫', character:'교육자' },
+      { id:22, type:'E', text:'사람들을 설득하거나 특정 목표를 향해 단체를 이끄는 리더 역할을 맡는 것이 재미있다.', emoji:'📣', character:'리더십 개발자' },
+      { id:23, type:'S', text:'의료인 지원 활동을 운영하며 사람들의 의견을 모으고 갈등을 조정하는 역할을 즐긴다.', emoji:'📋', character:'커뮤니티 매니저' },
+      { id:24, type:'S', text:'온라인 커뮤니티를 운영하며 사람들의 의견을 모으고 갈등을 조정하는 역할을 즐긴다.', emoji:'💬', character:'글로벌 컨설턴트' },
+      { id:25, type:'E', text:'새로운 사업 아이디어나 제품을 기획하고 사람들에게 소개하여 구매를 권유하는 일을 잘한다.', emoji:'💡', character:'스타트업 CEO' },
+      { id:26, type:'E', text:'팀 프로젝트에서 리더 역할을 맡아 사람들에게 동기를 부여하고 이끄는 것을 좋아한다.', emoji:'🔥', character:'카리스마 리더' },
+      { id:27, type:'E', text:'친구들과 함께 모임을 조직하거나 이벤트를 기획하여 사람들을 즐겁게 하는 것을 즐긴다.', emoji:'🎉', character:'이벤트 플래너' },
+      { id:28, type:'C', text:'복잡한 정보를 정리하여 체계적인 표나 파일로 정리하는 작업에 만족감을 느낀다.', emoji:'📊', character:'데이터 정리자' },
+      { id:29, type:'E', text:'글로벌 시장의 트렌드를 파악하고 새로운 비즈니스 기회를 찾아내는 일을 하고 싶다.', emoji:'🌐', character:'국제 비즈니스맨' },
+      { id:30, type:'E', text:'개인 브랜딩을 구축하거나 소셜 미디어를 통해 나의 영향력을 키우는 활동을 즐긴다.', emoji:'📱', character:'인플루언서' },
+      { id:31, type:'C', text:'복잡한 서류나 대규모 데이터베이스를 분류하고 체계적으로 관리하는 일에 능숙하다.', emoji:'📊', character:'정보 관리자' },
+      { id:32, type:'C', text:'정해진 규칙과 절차에 따라 일을 완벽하게 처리하는 데 만족감과 안도감을 느낀다.', emoji:'✅', character:'행정 전문가' },
+      { id:33, type:'C', text:'재무 현황을 분석하고 예산 계획을 세우는 등의 간단한 수치를 다루는 일이 좋다.', emoji:'💰', character:'회계사' },
+      { id:34, type:'C', text:'물품 보관이나 정리 작업을 체계적으로 진행하고 효율성을 높이는 데 능숙하다.', emoji:'📦', character:'물류 관리자' },
+      { id:35, type:'C', text:'꼼꼼하고 정확한 업무 수행이 요구되는 일을 신속하게 처리할 수 있는 자신이 있다.', emoji:'✍️', character:'사무 전문가' },
+      { id:36, type:'C', text:'새로운 자동화 도구나 업무 관리 시스템을 도입하여 효율성을 높이는 방법을 찾는다.', emoji:'⚙️', character:'업무 효율화 전문가' }
     ];
 
-    // 4) 결과 매핑(직군)
+    /* 4) 결과 직군 */
     const careerPaths = {
-      'IA': { title: 'AI 기반 콘텐츠 크리에이터', jobs:['데이터 시각화 디자이너','UX 리서치','미디어 아티스트','AI 아트 디렉터'], roadmap:{high:'미술, 정보, 미디어 교과 선택', college:'융합디자인, 데이터사이언스, 미디어 커뮤니케이션 전공', experience:'UI/UX 공모전 참여, 포트폴리오 제작, 디자인 실습 워크샵'}, skills:['창의적 문제해결','데이터 리터러시','디자인 사고'], growth:85 },
-      'IE': { title: 'AI 스타트업 전략가', jobs:['AI 기획자','테크 PM','비즈니스 애널리스트','디지털 컨설턴트'], roadmap:{high:'수학, 컴퓨터과학, 경제 교과 선택', college:'경영경제, 컴퓨터학과, 산업공학 전공', experience:'창업 동아리, HBR 케이스 컴페티션, 창업캠프 참여'}, skills:['논리적 사고','시장 분석','커뮤니케이션'], growth:92 },
-      'AI': { title: 'AI 엔지니어 겸 UX디자이너', jobs:['머신러닝 리서처','챗봇 개발자','데이터 시각화 전문가','AI 인터랙션 디자이너'], roadmap:{high:'수학, 과학, 정보 교과 선택', college:'컴퓨터공학, 인공지능, 통계학 전공', experience:'코딩 경시대회, 프로그래밍 동아리, 인공지능 프로젝트 경진대회'}, skills:['알고리즘','수학적 사고','창의적 문제 해결'], growth:78 },
-      'SE': { title: '소셜 임팩트 리더', jobs:['사회적기업가','CSR 매니저','임팩트 투자 기획자','임팩트 투자 전문가'], roadmap:{high:'사회문화, 생활과 윤리, 경제 교과 선택', college:'사회복지, 경영학, 국제개발학 전공', experience:'봉사 동아리, 사회적경제 동아리, 그린도잉 기획'}, skills:['공감 능력','리더십','문제해결력'], growth:73 },
-      'RI': { title: '첨단 로봇 엔지니어', jobs:['로봇공학자','IoT 개발자','바이오 엔지니어','우주항공 기술자'], roadmap:{high:'물리, 화학, 정보 교과 선택', college:'기계공학, 전자공학, 로봇공학 전공', experience:'올림피아드, 메이커 동아리, 로봇 경진대회'}, skills:['공학 능력','설계','프로그래밍'], growth:88 },
-      'IT': { title: '인간 중심 연구자', jobs:['심리학자','교육 연구원','신경과학자','UX 리서치'], roadmap:{high:'심리학, 사회문화, 생명과학 교과 선택', college:'심리학, 교육학, 인지과학 전공', experience:'심리 실험 봉사, 연구 프로젝트, 사회 조사 프로젝트'}, skills:['논리적 사고','공감 능력','연구 설계'], growth:76 },
-      'IC': { title: '데이터 사이언티스트', jobs:['데이터 애널리스트','통계전문가','정량분석가','비즈니스 인텔리전스'], roadmap:{high:'수학, 정보, 경제 교과 선택', college:'통계학, 응용수학, 정보사회학 전공', experience:'데이터 경진대회, 리서치 프로젝트, 빅데이터 동아리'}, skills:['통계학','프로그래밍','비즈니스 이해'], growth:95 },
-      'AS': { title: '예술 치료 전문가', jobs:['음악 치료사','예술 치료사','문화기획자','커뮤니티 아티스트'], roadmap:{high:'음악, 미술, 심리학 교과 선택', college:'예술치료학, 문예창작학, 실용심리학 전공', experience:'예술 봉사, 지역 프로그램 보조, 커뮤니티 프로젝트'}, skills:['창의성','공감 능력','정서 표현'], growth:71 },
-      'AC': { title: '디지털 아카이브 전문가', jobs:['큐레이터','디지털 아카이비스트','콘텐츠 에디터','박물관 전문가'], roadmap:{high:'미술, 역사, 정보 교과 선택', college:'문화콘텐츠학, 박물관학, 문헌정보학 전공', experience:'전시 기획, 아카이빙 프로젝트, 문화 콘텐츠 제작'}, skills:['정보학','패턴 인식','창의성'], growth:68 },
-      'SC': { title: '헬스케어 서비스 관리자', jobs:['공공기관 관리자','헬스케어 매니저','생활 서비스 코디네이터','웰니스 컨설턴트'], roadmap:{high:'사회문화, 생명과학, 정보 교과 선택', college:'보건행정, 사회복지학, 경영 전공', experience:'의료봉사, 서비스 기획, 헬스케어 프로젝트'}, skills:['소통 능력','체계적 관리','문제 해결'], growth:82 },
-      'RA': { title: '메이커 크리에이터', jobs:['제품 디자이너','3D 모델러','건축가','인테리어 디자이너'], roadmap:{high:'미술, 기술, 정보 교과 선택', college:'산업디자인, 기계공학, 건축 전공', experience:'모형 제작 대회, 워크숍 참여, 메이커 동아리'}, skills:['디자인','수리 능력','제품 분석'], growth:82 },
-      'EC': { title: '글로벌 무역 관리자', jobs:['국제 무역인','영업 관리자','글로벌 마케터','수출입 전문가'], roadmap:{high:'사회문화, 경제, 영어 교과 선택', college:'국제통상, 경영, 국제관계학 전공', experience:'비즈니스 경진대회, 무역 프로그램, 교환학생 프로젝트'}, skills:['협상력','국제 감각','분석 능력'], growth:79 }
+      IA:{title:'AI 기반 콘텐츠 크리에이터',jobs:['데이터 시각화 디자이너','UX 리서치','미디어 아티스트','AI 아트 디렉터'],roadmap:{high:'미술, 정보, 미디어 교과 선택',college:'융합디자인, 데이터사이언스, 미디어 커뮤니케이션 전공',experience:'UI/UX 공모전 참여, 포트폴리오 제작, 디자인 실습 워크샵'},skills:['창의적 문제해결','데이터 리터러시','디자인 사고'],growth:85},
+      IE:{title:'AI 스타트업 전략가',jobs:['AI 기획자','테크 PM','비즈니스 애널리스트','디지털 컨설턴트'],roadmap:{high:'수학, 컴퓨터과학, 경제 교과 선택',college:'경영경제, 컴퓨터학과, 산업공학 전공',experience:'창업 동아리, HBR 케이스 컴페티션, 창업캠프 참여'},skills:['논리적 사고','시장 분석','커뮤니케이션'],growth:92},
+      AI:{title:'AI 엔지니어 겸 UX디자이너',jobs:['머신러닝 리서처','챗봇 개발자','데이터 시각화 전문가','AI 인터랙션 디자이너'],roadmap:{high:'수학, 과학, 정보 교과 선택',college:'컴퓨터공학, 인공지능, 통계학 전공',experience:'코딩 경시대회, 프로그래밍 동아리, 인공지능 프로젝트 경진대회'},skills:['알고리즘','수학적 사고','창의적 문제 해결'],growth:78},
+      SE:{title:'소셜 임팩트 리더',jobs:['사회적기업가','CSR 매니저','임팩트 투자 기획자','임팩트 투자 전문가'],roadmap:{high:'사회문화, 생활과 윤리, 경제 교과 선택',college:'사회복지, 경영학, 국제개발학 전공',experience:'봉사 동아리, 사회적경제 동아리, 그린도잉 기획'},skills:['공감 능력','리더십','문제해결력'],growth:73},
+      RI:{title:'첨단 로봇 엔지니어',jobs:['로봇공학자','IoT 개발자','바이오 엔지니어','우주항공 기술자'],roadmap:{high:'물리, 화학, 정보 교과 선택',college:'기계공학, 전자공학, 로봇공학 전공',experience:'올림피아드, 메이커 동아리, 로봇 경진대회'},skills:['공학 능력','설계','프로그래밍'],growth:88},
+      IT:{title:'인간 중심 연구자',jobs:['심리학자','교육 연구원','신경과학자','UX 리서치'],roadmap:{high:'심리학, 사회문화, 생명과학 교과 선택',college:'심리학, 교육학, 인지과학 전공',experience:'심리 실험 봉사, 연구 프로젝트, 사회 조사 프로젝트'},skills:['논리적 사고','공감 능력','연구 설계'],growth:76},
+      IC:{title:'데이터 사이언티스트',jobs:['데이터 애널리스트','통계전문가','정량분석가','비즈니스 인텔리전스'],roadmap:{high:'수학, 정보, 경제 교과 선택',college:'통계학, 응용수학, 정보사회학 전공',experience:'데이터 경진대회, 리서치 프로젝트, 빅데이터 동아리'},skills:['통계학','프로그래밍','비즈니스 이해'],growth:95},
+      AS:{title:'예술 치료 전문가',jobs:['음악 치료사','예술 치료사','문화기획자','커뮤니티 아티스트'],roadmap:{high:'음악, 미술, 심리학 교과 선택',college:'예술치료학, 문예창작학, 실용심리학 전공',experience:'예술 봉사, 지역 프로그램 보조, 커뮤니티 프로젝트'},skills:['창의성','공감 능력','정서 표현'],growth:71},
+      AC:{title:'디지털 아카이브 전문가',jobs:['큐레이터','디지털 아카이비스트','콘텐츠 에디터','박물관 전문가'],roadmap:{high:'미술, 역사, 정보 교과 선택',college:'문화콘텐츠학, 박물관학, 문헌정보학 전공',experience:'전시 기획, 아카이빙 프로젝트, 문화 콘텐츠 제작'},skills:['정보학','패턴 인식','창의성'],growth:68},
+      SC:{title:'헬스케어 서비스 관리자',jobs:['공공기관 관리자','헬스케어 매니저','생활 서비스 코디네이터','웰니스 컨설턴트'],roadmap:{high:'사회문화, 생명과학, 정보 교과 선택',college:'보건행정, 사회복지학, 경영 전공',experience:'의료봉사, 서비스 기획, 헬스케어 프로젝트'},skills:['소통 능력','체계적 관리','문제 해결'],growth:82},
+      RA:{title:'메이커 크리에이터',jobs:['제품 디자이너','3D 모델러','건축가','인테리어 디자이너'],roadmap:{high:'미술, 기술, 정보 교과 선택',college:'산업디자인, 기계공학, 건축 전공',experience:'모형 제작 대회, 워크숍 참여, 메이커 동아리'},skills:['디자인','수리 능력','제품 분석'],growth:82},
+      EC:{title:'글로벌 무역 관리자',jobs:['국제 무역인','영업 관리자','글로벌 마케터','수출입 전문가'],roadmap:{high:'사회문화, 경제, 영어 교과 선택',college:'국제통상, 경영, 국제관계학 전공',experience:'비즈니스 경진대회, 무역 프로그램, 교환학생 프로젝트'},skills:['협상력','국제 감각','분석 능력'],growth:79}
     };
 
-    // 상태
+    /* 상태 */
     let idx = 0;
     const answers = [];
     const app = document.getElementById('app');
     const bar = document.getElementById('progressBar');
     const countText = document.getElementById('countText');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
 
-    const renderQuestion = () => {
+    function renderQuestion(){
       const q = questions[idx];
       const progress = Math.round(((idx+1)/questions.length)*100);
       bar.style.width = progress + '%';
       countText.textContent = `${idx+1} / ${questions.length}`;
+      nextBtn.textContent = '다음 →';
+      prevBtn.classList.toggle('hide', idx===0);
 
       app.innerHTML = `
         <div class="card">
@@ -177,15 +180,14 @@ const careerImages = {
           <div class="chip">${typeInfo[q.type].name} · ${q.character}</div>
           <p class="qtext">${q.text}</p>
           <div class="grid">
-            <button class="btn opt opt1 opt" data-v="5">매우 그렇다</button>
-            <button class="btn opt opt2 opt" data-v="4">그렇다</button>
-            <button class="btn opt opt3 opt" data-v="3">보통이다</button>
-            <button class="btn opt opt4 opt" data-v="2">그렇지 않다</button>
-            <button class="btn opt opt5 opt" data-v="1">전혀 그렇지 않다</button>
+            <button class="btn opt opt1" data-v="5">매우 그렇다</button>
+            <button class="btn opt opt2" data-v="4">그렇다</button>
+            <button class="btn opt opt3" data-v="3">보통이다</button>
+            <button class="btn opt opt4" data-v="2">그렇지 않다</button>
+            <button class="btn opt opt5" data-v="1">전혀 그렇지 않다</button>
           </div>
         </div>
       `;
-
       app.querySelectorAll('.opt').forEach(b=>{
         b.addEventListener('click', e=>{
           const v = Number(e.currentTarget.dataset.v);
@@ -194,106 +196,128 @@ const careerImages = {
           else { renderResult(); }
         });
       });
-    };
+    }
 
-    const calc = () => {
+    function calc(){
       const scores = {R:0,I:0,A:0,S:0,E:0,C:0,T:0};
-      answers.forEach(a => scores[a.type]+=a.value);
-      const sorted = Object.entries(scores).sort(([,a],[,b])=>b-a).slice(0,2);
-      const code = sorted.map(([t])=>t).join('');
-      const flip = sorted.map(([t])=>t).reverse().join('');
+      answers.forEach(a=>scores[a.type]+=a.value);
+      const ordered = Object.entries(scores).sort(([,a],[,b])=>b-a).slice(0,2);
+      const code = ordered.map(([t])=>t).join('');
+      const flip = ordered.map(([t])=>t).reverse().join('');
       const career = careerPaths[code] || careerPaths[flip] || null;
-      return {scores, top:sorted, code: career ? (careerPaths[code] ? code : flip) : code, career};
-    };
+      const chosen = careerPaths[code] ? code : (career ? flip : code);
+      return {scores, code:chosen, career};
+    }
 
-    const renderResult = () => {
-      const {scores, top, code, career} = calc();
-      const imgSrc = careerImages[code] || careerImages[code.split('').reverse().join('')] || '';
+    function renderResult(){
+      const {scores, code, career} = calc();
       bar.style.width = '100%';
       countText.textContent = `${questions.length} / ${questions.length}`;
+      nextBtn.textContent = '다시 시작';
+      prevBtn.classList.add('hide');
 
+      const imgSrc = careerImages[code] || careerImages[code.split('').reverse().join('')] || '';
       const scoreRows = Object.entries(scores)
         .sort(([,a],[,b])=>b-a)
         .map(([t,sc])=>{
           const max = questions.filter(q=>q.type===t).length*5 || 1;
           const pct = Math.round((sc/max)*100);
+          const color = typeInfo[t].color;
           return `
             <div class="score-row">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                <span class="pill" style="background:${typeInfo[t].color}">${typeInfo[t].name}</span>
+                <span class="pill" style="background:${color}">${typeInfo[t].name}</span>
                 <strong>${sc}점</strong>
               </div>
-              <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${typeInfo[t].color}"></div></div>
+              <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${color}"></div></div>
             </div>
           `;
         }).join('');
 
       app.innerHTML = `
-        <div class="grid card">
+        <div class="card">
+          <h2 class="result-head">설문 결과</h2>
+          <div class="result-sub">당신의 유형: <strong style="color:var(--pri)">${code}</strong></div>
+
           <div class="hero">
             <div class="center">
-              ${imgSrc ? `<img src="${imgSrc}" alt="${career?career.title:code} 캐릭터">` : `<div style="width:100%;max-width:520px;aspect-ratio:1/1;background:#f3f4f6;border-radius:16px" aria-hidden="true"></div>`}
+              ${imgSrc
+                ? `<img src="${imgSrc}" alt="${career?career.title:code} 캐릭터" onerror="this.style.display='none'">`
+                : `<div style="width:100%;max-width:520px;aspect-ratio:1/1;background:#f3f4f6;border-radius:16px"></div>`}
             </div>
-            <div>
-              <h2 style="margin:0 0 10px;font-size:28px">설문 결과</h2>
-              <div class="subtle" style="margin-bottom:14px">당신의 유형: <strong style="color:var(--pri)">${code}</strong></div>
 
+            <div class="grid">
               ${career ? `
                 <div class="recommend">
-                  <div style="font-weight:800;font-size:20px;margin-bottom:8px">추천 진로 · 성장 전망 ${career.growth}%</div>
-                  <div class="subtle" style="color:#e5e7eb">캐릭터 이미지는 assets/${code}.png 를 사용중</div>
+                  <div style="font-weight:800;font-size:18px;margin-bottom:6px">추천 진로 · 성장 전망 ${career.growth}%</div>
+                  <div style="opacity:.85">캐릭터 이미지: <code>assets/${code}.png</code></div>
                 </div>
 
-                <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:16px;margin-top:16px">
+                <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:16px">
                   <div class="score">
                     <div style="font-weight:800;margin-bottom:8px">관련 직업</div>
-                    <ul class="list">
-                      ${career.jobs.map(j=>`<li>${j}</li>`).join('')}
-                    </ul>
+                    <ul class="list">${career.jobs.map(j=>`<li>${j}</li>`).join('')}</ul>
                   </div>
                   <div class="score">
                     <div style="font-weight:800;margin-bottom:8px">필요 역량</div>
-                    <ul class="list">
-                      ${career.skills.map(s=>`<li>${s}</li>`).join('')}
-                    </ul>
+                    <ul class="list">${career.skills.map(s=>`<li>${s}</li>`).join('')}</ul>
                   </div>
                 </div>
+              ` : `<p>조합(${code})에 대한 추천 데이터가 없습니다.</p>`}
+            </div>
+          </div>
 
-                <div class="score" style="margin-top:16px">
-                  <div style="font-weight:800;margin-bottom:8px">진로 로드맵</div>
-                  <ul class="list">
-                    <li><strong>고등학교:</strong> ${career.roadmap.high}</li>
-                    <li><strong>대학:</strong> ${career.roadmap.college}</li>
-                    <li><strong>경험 쌓기:</strong> ${career.roadmap.experience}</li>
-                  </ul>
-                </div>
-              ` : `<p>해당 조합(${code})에 대한 추천 데이터가 없습니다.</p>`}
-
-              <div class="score" style="margin-top:16px">
-                <div style="font-weight:800;margin-bottom:8px">유형별 점수</div>
-                ${scoreRows}
+          <div class="fullwidth">
+            ${career ? `
+              <div class="card">
+                <div style="font-weight:800;margin-bottom:8px">진로 로드맵</div>
+                <ul class="list">
+                  <li><strong>고등학교:</strong> ${career.roadmap.high}</li>
+                  <li><strong>대학:</strong> ${career.roadmap.college}</li>
+                  <li><strong>경험 쌓기:</strong> ${career.roadmap.experience}</li>
+                </ul>
               </div>
+            `:''}
+
+            <div class="card">
+              <div style="font-weight:800;margin-bottom:8px">유형별 점수</div>
+              ${scoreRows}
+            </div>
+
+            <div class="center">
+              <button class="reset" id="resetBtn" type="button">🔄 검사 다시 시작</button>
             </div>
           </div>
         </div>
       `;
-    };
 
-    // 네비
-    document.getElementById('prevBtn').addEventListener('click', ()=>{
-      if(idx>0){ idx--; answers.pop(); renderQuestion(); }
+      document.getElementById('resetBtn').addEventListener('click', resetSurvey);
+    }
+
+    function resetSurvey(){
+      idx = 0;
+      answers.length = 0;
+      renderQuestion();
+    }
+
+    /* 네비 버튼 */
+    prevBtn.addEventListener('click', ()=>{
+      if(idx>0){
+        idx--; answers.pop(); renderQuestion();
+      }
     });
-    document.getElementById('nextBtn').addEventListener('click', ()=>{
-      // "건너뛰기" 기능: 보통은 사용하지 않지만 버튼 유지
+    nextBtn.addEventListener('click', ()=>{
+      if(nextBtn.textContent.includes('다시 시작')){ resetSurvey(); return; }
       if(idx < questions.length-1){ idx++; renderQuestion(); }
       else { renderResult(); }
     });
     window.addEventListener('keydown', e=>{
-      if(e.key==='ArrowLeft'){ if(idx>0){ idx--; answers.pop(); renderQuestion(); } }
+      if(nextBtn.textContent.includes('다시 시작')) return;
+      if(e.key==='ArrowLeft' && idx>0){ idx--; answers.pop(); renderQuestion(); }
       if(e.key==='ArrowRight'){ if(idx<questions.length-1){ idx++; renderQuestion(); } else { renderResult(); } }
     });
 
-    // 초기 렌더
+    /* 초기 렌더 */
     renderQuestion();
   </script>
 </body>
