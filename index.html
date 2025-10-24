@@ -98,8 +98,8 @@
 
   #captureArea{position:relative}
 
-  /* ▼ 저장 품질/여백/일관성용: 저장 모드에서만 적용 */
-  .exporting #captureArea{ width:1080px; margin:0 auto; }
+  /* 오프스크린 캡처 컨테이너(실제 화면에 보이지 않음) */
+  .offscreen-capture{ position:fixed; left:-9999px; top:0; width:1080px; background:#fff; padding:32px; box-sizing:border-box; pointer-events:none; opacity:0; }
 </style>
 </head>
 <body>
@@ -329,7 +329,7 @@ const careerPaths = {
        jobs:['건설 감독','물류 관리자','안전 관리자','스포츠 에이전트'],
        roadmap:{high:'체육, 가정, 경영', college:'건설·물류·안전공학', experience:'현장 실습, 안전 교육, PM'},
        skills:['신체 활동성','리더십','위기 관리'], growth:72 },
-}
+};
 
 /** 상태 */
 let idx = 0;
@@ -385,7 +385,7 @@ function renderQuestion(){
       b.classList.add('active');
       answers[q.id] = o.v;
       nextBtn.disabled = false;
-    }
+    };
     choicesWrap.appendChild(b);
   });
 
@@ -461,37 +461,34 @@ function calcAndRenderResult(){
   });
 }
 
-/** JPEG 저장(여백 + iOS 폴백 + 고정폭) */
-saveJpg.onclick = async ()=>{
-  const root = document.body;
-  root.classList.add('exporting'); // 저장 모드(폭 1080px)
+/** JPEG 저장 (오프스크린 캡처 + 1080px 기준폭 + 32px 여백 + iOS 폴백) */
+saveJpg.onclick = async () => {
+  const source = document.getElementById('captureArea');
 
-  const target = document.getElementById('captureArea');
+  // 화면에 보이지 않는 오프스크린 컨테이너 생성
+  const offscreen = document.createElement('div');
+  offscreen.className = 'offscreen-capture';
 
-  const baseCanvas = await html2canvas(target, {
-    backgroundColor:'#ffffff',
-    scale:2,           // 선명도
-    useCORS:true,
-    windowWidth:1080   // 렌더 기준 폭 고정
+  // 캡처 대상 복제(현재 상태 그대로)
+  const clone = source.cloneNode(true);
+  offscreen.appendChild(clone);
+  document.body.appendChild(offscreen);
+
+  // 캡처 수행 (실제 화면 레이아웃에 영향 없음)
+  const canvas = await html2canvas(offscreen, {
+    backgroundColor: '#ffffff',
+    scale: 2,
+    useCORS: true,
+    windowWidth: 1080
   });
 
-  // 안전 여백(32px) 추가 – scale(2) 고려
-  const marginCSS = 32;
-  const scale = 2;
-  const pad = marginCSS * scale;
+  // 오프스크린 제거
+  document.body.removeChild(offscreen);
 
-  const out = document.createElement('canvas');
-  out.width  = baseCanvas.width  + pad*2;
-  out.height = baseCanvas.height + pad*2;
+  // JPEG 데이터
+  const dataURL = canvas.toDataURL('image/jpeg', 0.92);
 
-  const ctx = out.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0,0,out.width,out.height);
-  ctx.drawImage(baseCanvas, pad, pad);
-
-  const dataURL = out.toDataURL('image/jpeg', 0.92);
-
-  // 기본 다운로드 시도
+  // 기본 다운로드 (데스크톱/안드로이드)
   const a = document.createElement('a');
   a.href = dataURL;
   a.download = 'career-result.jpg';
@@ -499,7 +496,7 @@ saveJpg.onclick = async ()=>{
   a.click();
   a.remove();
 
-  // iOS Safari 폴백 (a.download 미지원 케이스)
+  // iOS Safari 폴백 (새 탭으로 이미지 열어 저장 유도)
   const ua = navigator.userAgent || navigator.vendor || window.opera;
   const isIOS = /iPad|iPhone|iPod/.test(ua);
   if (isIOS) {
@@ -516,8 +513,6 @@ saveJpg.onclick = async ()=>{
       }
     }, 150);
   }
-
-  root.classList.remove('exporting');
 };
 </script>
 </body>
