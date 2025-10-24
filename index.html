@@ -4,10 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>진로 관심사 설문조사</title>
-<!-- Pretendard 웹폰트(가볍고 가독성 좋음) -->
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
-<!-- html2canvas (결과를 JPEG로 저장) -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
   :root{
@@ -16,7 +14,7 @@
     --brand:#7c3aed; --brand-2:#ec4899; --ok:#10b981; --warn:#f59e0b;
     --ring: 0 10px 30px rgba(124, 58, 237,.18);
     --ring-2: 0 10px 30px rgba(236, 72, 153,.18);
-    --w: 960px;         /* 모든 섹션 동일 폭 */
+    --w: 960px;
     --pad: clamp(16px, 2.8vw, 28px);
     --radius: 18px;
   }
@@ -32,26 +30,18 @@
     display:flex; align-items:flex-start; justify-content:center;
     padding: min(8vh,60px) 14px;
   }
-  .container{
-    width: min(100%, var(--w));
-    margin:auto;
-  }
+  .container{ width:min(100%,var(--w)); margin:auto; }
   .panel{
     background:var(--card);
     border-radius: calc(var(--radius) + 6px);
     box-shadow: 0 2px 0 rgba(255,255,255,.4) inset, 0 1px 0 rgba(0,0,0,.05);
     padding: clamp(18px, 3.4vw, 36px);
   }
-  .glass{
-    background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.86));
-    backdrop-filter: blur(6px);
-  }
+  .glass{ background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.86)); backdrop-filter:blur(6px); }
   .title{font-weight:800; letter-spacing:-.02em; margin:0 0 4px; font-size:clamp(26px,4.2vw,44px)}
   .sub{color:var(--muted); margin:0 0 18px; font-size:clamp(14px,1.9vw,18px)}
-  .badge{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; font-weight:700;
-    background:linear-gradient(90deg,#f5f3ff,#fdf4ff); border-radius:999px; border:1px solid #ede9fe; color:#6d28d9; font-size:13px}
-  .note{background:linear-gradient(180deg,#f8fafc,#f1f5f9); border:1px solid #e2e8f0;
-    border-radius:16px; padding:16px 18px; color:#0f172a}
+  .badge{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; font-weight:700; background:linear-gradient(90deg,#f5f3ff,#fdf4ff); border-radius:999px; border:1px solid #ede9fe; color:#6d28d9; font-size:13px}
+  .note{background:linear-gradient(180deg,#f8fafc,#f1f5f9); border:1px solid #e2e8f0; border-radius:16px; padding:16px 18px; color:#0f172a}
   .note ul{margin:10px 0 0 18px; padding:0}
   .note li{margin:8px 0}
   .btn{
@@ -70,12 +60,8 @@
   .progress > i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--brand),var(--brand-2)); transition:width .25s}
   .q-emoji{font-size:40px; margin-bottom:6px}
   .chip{display:inline-block; padding:6px 10px; font-weight:700; border-radius:999px; font-size:12px; color:#fff}
-  .chip.R{background:#3b82f6}
-  .chip.I{background:#8b5cf6}
-  .chip.A{background:#ec4899}
-  .chip.S{background:#22c55e}
-  .chip.E{background:#f59e0b}
-  .chip.C{background:#14b8a6}
+  .chip.R{background:#3b82f6} .chip.I{background:#8b5cf6} .chip.A{background:#ec4899}
+  .chip.S{background:#22c55e} .chip.E{background:#f59e0b} .chip.C{background:#14b8a6}
   .choice{
     width:100%; border:1px solid #e5e7eb; border-radius:14px; padding:14px 16px; background:#f8fafc;
     display:flex; align-items:center; justify-content:space-between; font-weight:700;
@@ -99,9 +85,7 @@
   .bar{height:12px; background:#e2e8f0; border-radius:999px; overflow:hidden}
   .bar i{display:block; height:100%}
   .grid{display:grid; gap:14px}
-  @media (min-width: 840px){
-    .grid.cols-2{grid-template-columns: 1fr 1fr}
-  }
+  @media (min-width: 840px){ .grid.cols-2{grid-template-columns: 1fr 1fr} }
   .card{background:var(--soft); border:1px solid #e5e7eb; border-radius:16px; padding:16px}
   .jobs{display:grid; gap:10px}
   @media (min-width:740px){ .jobs{grid-template-columns: 1fr 1fr} }
@@ -111,8 +95,11 @@
   .road ul{margin:8px 0 0 16px}
   .road li{margin:8px 0}
   .hidden{display:none !important}
-  /* 결과 캡쳐 영역 테두리(사용자에겐 보이지 않음) */
+
   #captureArea{position:relative}
+
+  /* ▼ 저장 품질/여백/일관성용: 저장 모드에서만 적용 */
+  .exporting #captureArea{ width:1080px; margin:0 auto; }
 </style>
 </head>
 <body>
@@ -344,16 +331,10 @@ const careerPaths = {
        skills:['신체 활동성','리더십','위기 관리'], growth:72 },
 }
 
-/** -----------------------------
- * 상태
- * ----------------------------- */
-let page = 'intro';
+/** 상태 */
 let idx = 0;
-const answers = {}; // {id: score}
-
-/** -----------------------------
- * 엘리먼트
- * ----------------------------- */
+const answers = {};
+/** 엘리먼트 */
 const $ = (s)=>document.querySelector(s);
 const intro = $('#intro'), survey = $('#survey'), result = $('#result');
 const startBtn = $('#startBtn'), prevBtn = $('#prev'), nextBtn = $('#next');
@@ -361,28 +342,20 @@ const qType = $('#qType'), qEmoji = $('#qEmoji'), qText = $('#qText'), qRole = $
 const choicesWrap = $('#choices'), pgFill = $('#pgFill');
 const saveJpg = $('#saveJpg'), restartBtn = $('#restart');
 
-/** -----------------------------
- * 네비게이션
- * ----------------------------- */
+/** 네비게이션 */
 startBtn.onclick = () => goSurvey();
-prevBtn.onclick = () => { if(idx>0){ idx--; renderQuestion(); } };
-nextBtn.onclick = () => {
+prevBtn && (prevBtn.onclick = () => { if(idx>0){ idx--; renderQuestion(); } });
+nextBtn && (nextBtn.onclick = () => {
   if(idx < questions.length-1){ idx++; renderQuestion(); }
   else { calcAndRenderResult(); }
-};
+});
 restartBtn.onclick = () => { location.reload(); };
 
-/** -----------------------------
- * 렌더: 설문 진입 & 문항
- * ----------------------------- */
-function goSurvey(){
-  intro.classList.add('hidden'); survey.classList.remove('hidden');
-  idx = 0; renderQuestion();
-}
+/** 설문 */
+function goSurvey(){ intro.classList.add('hidden'); survey.classList.remove('hidden'); idx=0; renderQuestion(); }
 
 function renderQuestion(){
   const q = questions[idx];
-  page = 'survey';
   const progress = ((idx+1) / questions.length) * 100;
   pgFill.style.width = progress+'%';
 
@@ -421,17 +394,11 @@ function renderQuestion(){
   nextBtn.disabled = (prevVal==null);
 }
 
-/** -----------------------------
- * 계산 & 결과 렌더
- * ----------------------------- */
+/** 결과 렌더 */
 function calcAndRenderResult(){
-  // 점수합
   const scores = {R:0,I:0,A:0,S:0,E:0,C:0};
-  questions.forEach(q=>{
-    if(answers[q.id]) scores[q.type] += answers[q.id];
-  });
+  questions.forEach(q=>{ if(answers[q.id]) scores[q.type] += answers[q.id]; });
 
-  // 정렬 & 백분율(각 유형 6문항, 최대 30점)
   const all = Object.entries(scores)
     .map(([t,score])=>({type:t, score, pct: Math.round((score/30)*100)}))
     .sort((a,b)=>b.score-a.score);
@@ -444,9 +411,9 @@ function calcAndRenderResult(){
     career = careerPaths[fallback] || careerPaths['IA'];
   }
 
-  survey.classList.add('hidden'); result.classList.remove('hidden'); page='result';
+  survey.classList.add('hidden'); result.classList.remove('hidden');
 
-  // Top3 메달
+  // Top3
   const top3 = $('#top3');
   top3.innerHTML = '';
   top.forEach((t,i)=>{
@@ -461,7 +428,6 @@ function calcAndRenderResult(){
 
   // 추천 진로
   $('#careerTitle').textContent = career.title;
-  // 결과 이미지 (assets/XX.png) 안전 로드
   const img = $('#careerImg');
   const imgCode = (careerPaths[code]) ? code : code.split('').reverse().join('');
   img.src = `assets/${imgCode}.png`;
@@ -477,16 +443,12 @@ function calcAndRenderResult(){
   });
 
   const skills = $('#skillList'); skills.innerHTML='';
-  career.skills.forEach(s=>{
-    const li = document.createElement('li'); li.textContent = s; skills.appendChild(li);
-  });
+  career.skills.forEach(s=>{ const li = document.createElement('li'); li.textContent = s; skills.appendChild(li); });
 
-  const rh = $('#roadHigh'); const rc = $('#roadCollege'); const re = $('#roadExp');
-  rh.innerHTML = `<li><strong>고등학교 단계 —</strong> ${career.roadmap.high}</li>`;
-  rc.innerHTML = `<li><strong>대학 단계 —</strong> ${career.roadmap.college}</li>`;
-  re.innerHTML = `<li><strong>경험 및 활동 —</strong> ${career.roadmap.experience}</li>`;
+  $('#roadHigh').innerHTML = `<li><strong>고등학교 단계 —</strong> ${career.roadmap.high}</li>`;
+  $('#roadCollege').innerHTML = `<li><strong>대학 단계 —</strong> ${career.roadmap.college}</li>`;
+  $('#roadExp').innerHTML = `<li><strong>경험 및 활동 —</strong> ${career.roadmap.experience}</li>`;
 
-  // 전체 점수 보드
   const board = $('#scoreBoard'); board.innerHTML='';
   all.forEach(item=>{
     const row = document.createElement('div');
@@ -499,17 +461,63 @@ function calcAndRenderResult(){
   });
 }
 
-/** -----------------------------
- * JPEG 저장
- * ----------------------------- */
+/** JPEG 저장(여백 + iOS 폴백 + 고정폭) */
 saveJpg.onclick = async ()=>{
+  const root = document.body;
+  root.classList.add('exporting'); // 저장 모드(폭 1080px)
+
   const target = document.getElementById('captureArea');
-  // 스크롤 영역 포함 너비 유지
-  const canvas = await html2canvas(target, {backgroundColor:'#ffffff', scale:2, useCORS:true});
-  const dataURL = canvas.toDataURL('image/jpeg', 0.92);
+
+  const baseCanvas = await html2canvas(target, {
+    backgroundColor:'#ffffff',
+    scale:2,           // 선명도
+    useCORS:true,
+    windowWidth:1080   // 렌더 기준 폭 고정
+  });
+
+  // 안전 여백(32px) 추가 – scale(2) 고려
+  const marginCSS = 32;
+  const scale = 2;
+  const pad = marginCSS * scale;
+
+  const out = document.createElement('canvas');
+  out.width  = baseCanvas.width  + pad*2;
+  out.height = baseCanvas.height + pad*2;
+
+  const ctx = out.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,out.width,out.height);
+  ctx.drawImage(baseCanvas, pad, pad);
+
+  const dataURL = out.toDataURL('image/jpeg', 0.92);
+
+  // 기본 다운로드 시도
   const a = document.createElement('a');
-  a.href = dataURL; a.download = 'career-result.jpg';
-  document.body.appendChild(a); a.click(); a.remove();
+  a.href = dataURL;
+  a.download = 'career-result.jpg';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  // iOS Safari 폴백 (a.download 미지원 케이스)
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  if (isIOS) {
+    setTimeout(() => {
+      const w = window.open();
+      if (w) {
+        w.document.title = '길게 눌러 “사진에 추가”';
+        w.document.body.style.margin = '0';
+        const img = new Image();
+        img.src = dataURL;
+        img.style.width = '100%';
+        img.style.height = 'auto';
+        w.document.body.appendChild(img);
+      }
+    }, 150);
+  }
+
+  root.classList.remove('exporting');
 };
 </script>
 </body>
