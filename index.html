@@ -1,319 +1,377 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>진로 카드뉴스 설문 (GitHub Pages)</title>
-<style>
-  :root{
-    --bg:#f7f7f8; --card:#ffffff; --ink:#16181d; --sub:#6b7280;
-    --pri:#7c3aed; --pri2:#ec4899; --mut:#e5e7eb; --chip:#eef2ff;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif}
-  .wrap{max-width:960px;margin:0 auto;padding:24px}
-  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-  .title{font-weight:800;font-size:20px}
-  .hint{color:var(--sub);font-size:14px}
-  .progress{height:8px;border-radius:999px;background:var(--mut);overflow:hidden}
-  .bar{height:100%;width:0;background:linear-gradient(90deg,var(--pri),var(--pri2));transition:width .25s}
-
-  .card{background:var(--card);border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.06);padding:28px}
-  .grid{display:grid;gap:16px}
-  .q-emoji{font-size:56px;margin-bottom:8px;text-align:center}
-  .chip{display:inline-block;background:var(--chip);color:#3730a3;font-weight:700;border-radius:999px;padding:6px 12px;margin-bottom:12px;font-size:12px}
-  .qtext{font-size:22px;line-height:1.5;text-align:center;margin:0 0 8px}
-
-  .btn{border:0;border-radius:14px;padding:14px 16px;font-weight:700;color:#fff;cursor:pointer}
-  .opt{width:100%}
-  .opt1{background:linear-gradient(90deg,#22c55e,#059669)}
-  .opt2{background:linear-gradient(90deg,#3b82f6,#06b6d4)}
-  .opt3{background:linear-gradient(90deg,#8b5cf6,#6366f1)}
-  .opt4{background:linear-gradient(90deg,#f59e0b,#f97316)}
-  .opt5{background:linear-gradient(90deg,#ef4444,#fb7185)}
-
-  .actions{display:flex;justify-content:space-between;margin-top:18px}
-  .ghost{background:#111;color:#fff;border-radius:14px;padding:12px 18px}
-  .muted{color:var(--sub);font-size:12px;text-align:center;margin-top:18px}
-
-  /* ===== 결과 페이지 강화 ===== */
-  .result-head{ text-align:center; margin:0 0 6px; font-size:36px; font-weight:900; letter-spacing:-.02em; }
-  .result-sub{ color:var(--sub); text-align:center; margin:0 0 18px; font-size:18px; }
-  .hero{display:grid;grid-template-columns:1fr;gap:18px;align-items:center}
-  .hero.withImage{grid-template-columns:340px 1fr}
-  .hero img{width:100%;max-width:340px;aspect-ratio:1/1;object-fit:contain;display:block;margin:0 auto}
-  .ai-note{font-size:12px;opacity:.65;margin-top:6px}
-
-  .section-title{font-size:20px;font-weight:900;margin-bottom:10px}
-  .recommend{background:linear-gradient(90deg,#6366f1,#a855f7);color:#fff;border-radius:16px;padding:18px}
-  .recommend .big{font-size:22px;font-weight:900;margin-bottom:6px}
-  .list{margin:0;padding:0 0 0 18px;font-size:16px;line-height:1.6}
-  .subtle{color:var(--sub)}
-  .score{background:#f9fafb;border-radius:16px;padding:16px}
-  .score-row{margin-bottom:12px}
-  .score-bar{height:10px;border-radius:999px;background:var(--mut);overflow:hidden}
-  .score-fill{height:100%;border-radius:999px}
-  .pill{display:inline-block;background:#111;color:#fff;padding:7px 12px;border-radius:999px;font-size:13px;margin-right:8px}
-  .fullwidth{margin-top:16px;display:grid;gap:16px}
-  .hide{display:none!important}
-</style>
+  <meta charset="utf-8" />
+  <title>진로 관심사 설문조사</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#7c3aed" />
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React 18 -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- html2canvas for JPG export -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root{
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+    }
+    body{
+      padding-top: max(0px, var(--safe-top));
+      padding-bottom: max(0px, var(--safe-bottom));
+      background: linear-gradient(135deg,#5b6ee1 0%, #a855f7 40%, #ec4899 100%);
+      min-height: 100svh;
+    }
+    .page-wrap{ max-width: 720px; }
+    .export-surface{ background:#ffffff; } /* JPG 저장 영역 흰 배경 고정 */
+  </style>
 </head>
-<body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="title">진로 카드뉴스 설문</div>
-      <div class="hint">for GitHub Pages</div>
-    </div>
+<body class="font-sans text-gray-900 antialiased">
+  <div id="app" class="px-4 sm:px-6 md:px-8 py-6 sm:py-10"></div>
 
-    <div class="progress" aria-label="진행도"><div id="progressBar" class="bar"></div></div>
-    <div class="subtle" style="text-align:right;margin:6px 0 18px"><span id="countText">0 / 36</span></div>
+  <script type="text/babel">
+    const {useState} = React;
 
-    <div id="app" class="grid"></div>
-
-    <div class="actions">
-      <button id="prevBtn" class="ghost" type="button">← 이전</button>
-      <button id="nextBtn" class="ghost" type="button">다음 →</button>
-    </div>
-    <div class="muted">스와이프(모바일) · 방향키(←/→) 지원</div>
-  </div>
-
-  <script>
-    /* 이미지 매핑 */
-    const careerImages = {
-      AI:"assets/AI.png", IA:"assets/IA.png", IE:"assets/IE.png", RI:"assets/RI.png",
-      IT:"assets/IT.png", IC:"assets/IC.png", AS:"assets/AS.png", AC:"assets/AC.png",
-      SC:"assets/SC.png", RA:"assets/RA.png", EC:"assets/EC.png", SE:"assets/SE.png"
-    };
-
+    /* ================= 데이터 ================= */
     const typeInfo = {
-      R:{name:'실재형', color:'#2563eb'}, I:{name:'탐구형', color:'#7c3aed'},
-      A:{name:'예술형', color:'#ec4899'}, S:{name:'사회형', color:'#10b981'},
-      E:{name:'진취형', color:'#f59e0b'}, C:{name:'관습형', color:'#6b7280'}, T:{name:'탐구형', color:'#7c3aed'}
+      R:{name:'실재형',color:'bg-blue-500'},
+      I:{name:'탐구형',color:'bg-purple-500'},
+      A:{name:'예술형',color:'bg-pink-500'},
+      S:{name:'사회형',color:'bg-green-500'},
+      E:{name:'진취형',color:'bg-orange-500'},
+      C:{name:'관습형',color:'bg-teal-500'},
     };
 
-    /* 36문항 (기존 그대로) */
-    const questions=[ /* …중략: 기존 배열 36개 항목을 그대로 사용… */ 
-      {id:1,type:'R',text:'3D 프린터나 로봇과 같은 기계를 조작하여 결과물을 만드는 활동에 흥미를 느낀다.',emoji:'🔧',character:'미래 엔지니어'},
-      {id:2,type:'R',text:'직접 물을 주며 야외에서 식물을 기르거나 동물을 돌보는 활동을 즐긴다.',emoji:'🌾',character:'바이오 전문가'},
-      {id:3,type:'R',text:'복잡하게 쌓인 장난감이나 기계 장치의 퍼즐을 맞추며 해결하는 것에 흥미가 있다.',emoji:'🔩',character:'메카닉 마스터'},
-      {id:4,type:'I',text:'새로운 과학 실험이나 연구 결과를 접하면 그 원리를 탐구하고 싶다.',emoji:'🔬',character:'과학 탐구자'},
-      {id:5,type:'I',text:'궁금한 것이 생기면 반드시 질문하고 답을 찾아 오랫동안 연구하는 편이다.',emoji:'🔍',character:'지식 탐험가'},
-      {id:6,type:'R',text:'가상현실(VR) 장비로 이용해 기계 작동 시뮬레이션을 경험하는 것이 좋다.',emoji:'🕹️',character:'VR 트레이너'},
-      {id:7,type:'I',text:'수업은 데이터나 통계 자료를 분석하여 숨겨진 규칙이나 의미를 찾아내는 것에 흥미가 있다.',emoji:'📊',character:'빅데이터 분석가'},
-      {id:8,type:'T',text:'인간의 심리, 뇌 과학 등 복잡한 인성의 원리를 깊이 있게 연구하고 싶다.',emoji:'🧠',character:'심리 과학자'},
-      {id:9,type:'A',text:'그림, 음악, 연기 등 창의적인 방식으로 나의 생각을 자유롭게 표현하는 것이 즐겁다.',emoji:'🎨',character:'아티스트'},
-      {id:10,type:'A',text:'새로운 노래나 공연을 기획하거나 직접 참여하는 활동을 즐겁게 한다.',emoji:'🎭',character:'크리에이터'},
-      {id:11,type:'I',text:'미래 사회의 변화나 우주의 신비 등 미지의 영역에 대해 끊임없이 질문을 던진다.',emoji:'✨',character:'미래학자'},
-      {id:12,type:'T',text:'복잡한 논리 게임이나 추리 소설을 읽으며 정보를 조합하고 결론을 도출하는 활동을 좋아한다.',emoji:'🔍',character:'논리학자'},
-      {id:13,type:'A',text:'그림, 음악, 글쓰기 등 창의적인 방법으로 나의 생각이나 감정을 표현하는 것을 좋아한다.',emoji:'🎨',character:'멀티 아티스트'},
-      {id:14,type:'A',text:'디지털 드로잉이나 미디어 아트 등 새로운 기술을 활용한 예술 활동에 관심이 많다.',emoji:'💻',character:'미디어 아티스트'},
-      {id:15,type:'A',text:'영상 편집, 웹툰 제작, 게임 스토리 기획 등 현대 콘텐츠를 만드는 일을 하고 싶다.',emoji:'🎬',character:'콘텐츠 크리에이터'},
-      {id:16,type:'A',text:'영화, 패션, 공연 디자인 등 창의적인 프로젝트를 기획하고 실현하고 싶다.',emoji:'🌟',character:'프로듀서'},
-      {id:17,type:'S',text:'친구들 사이에서 갈등이나 문제가 생기면 중재하고 조화를 이루도록 돕는 역할을 자주 맡는다.',emoji:'🤝',character:'갈등 중재자'},
-      {id:18,type:'S',text:'누군가 어려움에 처한 것을 보면 적극적으로 도움을 제공하거나 문제를 해결해주는 일에 보람을 느낀다.',emoji:'💝',character:'사회 봉사가'},
-      {id:19,type:'S',text:'취약 계층이나 도움이 필요한 사람들을 위해 봉사하고 문제를 해결해주는 일에 보람을 느낀다.',emoji:'🏥',character:'사회 봉사가'},
-      {id:20,type:'S',text:'친구들의 고민을 들어주고 공감하여 지지를 베푸는 역할이 편안하다.',emoji:'💬',character:'심리 상담가'},
-      {id:21,type:'S',text:'다른 사람에게 새로운 지식이나 기술을 재미있고 효과적으로 가르치는 일을 잘한다.',emoji:'👩‍🏫',character:'교육자'},
-      {id:22,type:'E',text:'사람들을 설득하거나 특정 목표를 향해 단체를 이끄는 리더 역할을 맡는 것이 재미있다.',emoji:'📣',character:'리더십 개발자'},
-      {id:23,type:'S',text:'의료인 지원 활동을 운영하며 사람들의 의견을 모으고 갈등을 조정하는 역할을 즐긴다.',emoji:'📋',character:'커뮤니티 매니저'},
-      {id:24,type:'S',text:'온라인 커뮤니티를 운영하며 사람들의 의견을 모으고 갈등을 조정하는 역할을 즐긴다.',emoji:'💬',character:'글로벌 컨설턴트'},
-      {id:25,type:'E',text:'새로운 사업 아이디어나 제품을 기획하고 사람들에게 소개하여 구매를 권유하는 일을 잘한다.',emoji:'💡',character:'스타트업 CEO'},
-      {id:26,type:'E',text:'팀 프로젝트에서 리더 역할을 맡아 사람들에게 동기를 부여하고 이끄는 것을 좋아한다.',emoji:'🔥',character:'카리스마 리더'},
-      {id:27,type:'E',text:'친구들과 함께 모임을 조직하거나 이벤트를 기획하여 사람들을 즐겁게 하는 것을 즐긴다.',emoji:'🎉',character:'이벤트 플래너'},
-      {id:28,type:'C',text:'복잡한 정보를 정리하여 체계적인 표나 파일로 정리하는 작업에 만족감을 느낀다.',emoji:'📊',character:'데이터 정리자'},
-      {id:29,type:'E',text:'글로벌 시장의 트렌드를 파악하고 새로운 비즈니스 기회를 찾아내는 일을 하고 싶다.',emoji:'🌐',character:'국제 비즈니스맨'},
-      {id:30,type:'E',text:'개인 브랜딩을 구축하거나 소셜 미디어를 통해 나의 영향력을 키우는 활동을 즐긴다.',emoji:'📱',character:'인플루언서'},
-      {id:31,type:'C',text:'복잡한 서류나 대규모 데이터베이스를 분류하고 체계적으로 관리하는 일에 능숙하다.',emoji:'📊',character:'정보 관리자'},
-      {id:32,type:'C',text:'정해진 규칙과 절차에 따라 일을 완벽하게 처리하는 데 만족감과 안도감을 느낀다.',emoji:'✅',character:'행정 전문가'},
-      {id:33,type:'C',text:'재무 현황을 분석하고 예산 계획을 세우는 등의 간단한 수치를 다루는 일이 좋다.',emoji:'💰',character:'회계사'},
-      {id:34,type:'C',text:'물품 보관이나 정리 작업을 체계적으로 진행하고 효율성을 높이는 데 능숙하다.',emoji:'📦',character:'물류 관리자'},
-      {id:35,type:'C',text:'꼼꼼하고 정확한 업무 수행이 요구되는 일을 신속하게 처리할 수 있는 자신이 있다.',emoji:'✍️',character:'사무 전문가'},
-      {id:36,type:'C',text:'새로운 자동화 도구나 업무 관리 시스템을 도입하여 효율성을 높이는 방법을 찾는다.',emoji:'⚙️',character:'업무 효율화 전문가'}
+    const questions = [
+      // R
+      { id:1,type:'R',text:'3D 프린터나 로봇과 같은 기계를 조작하여 결과물을 만드는 활동에 흥미를 느낀다.',emoji:'⚙️',character:'미래 엔지니어'},
+      { id:2,type:'R',text:'직접 몸을 움직여 야외에서 식물을 기르거나 동물을 돌보는 활동을 즐긴다.',emoji:'🌱',character:'바이오 전문가'},
+      { id:3,type:'R',text:'복잡하게 얽힌 전선이나 기계 장치의 문제를 찾아내고 수리하는 일에 몰두한다.',emoji:'🔧',character:'유지보수 기술자'},
+      { id:4,type:'R',text:'실제 건축물이나 인테리어 모형을 설계하고 제작하는 작업이 재미있다.',emoji:'🏗️',character:'스마트 건설가'},
+      { id:5,type:'R',text:'보안·소방·응급구조 등 신체 활동이 요구되는 일을 하고 싶다.',emoji:'🚨',character:'안전 요원'},
+      { id:6,type:'R',text:'VR 장비로 기계 작동 시뮬레이션을 경험하는 것이 좋다.',emoji:'🥽',character:'VR 트레이너'},
+      // I
+      { id:7,type:'I',text:'데이터/통계를 분석해 숨겨진 규칙을 찾는 것에 흥미가 있다.',emoji:'📊',character:'빅데이터 분석가'},
+      { id:8,type:'I',text:'심리·뇌과학 등 복잡한 원리를 깊이 연구하고 싶다.',emoji:'🧠',character:'인지 과학자'},
+      { id:9,type:'I',text:'과학 실험과 가설 검증을 통해 지식을 발견하는 것이 즐겁다.',emoji:'🔬',character:'연구원'},
+      { id:10,type:'I',text:'AI 오류 원인을 논리적으로 파헤치고 해결하는 과정을 좋아한다.',emoji:'🤖',character:'AI 디버거'},
+      { id:11,type:'I',text:'미래 사회 변화/우주 신비 등 미지의 영역에 질문을 던진다.',emoji:'🔭',character:'미래학자'},
+      { id:12,type:'I',text:'논리 게임/추리로 정보를 조합하고 결론을 내리는 활동을 좋아한다.',emoji:'🔍',character:'논리학자'},
+      // A
+      { id:13,type:'A',text:'그림·음악·글쓰기 등 창의적으로 생각/감정을 표현하는 것을 좋아한다.',emoji:'🎨',character:'멀티 아티스트'},
+      { id:14,type:'A',text:'디지털 드로잉/미디어아트 등 기술을 활용한 예술 활동에 관심이 많다.',emoji:'💻',character:'미디어 아티스트'},
+      { id:15,type:'A',text:'영상 편집, 웹툰, 게임 스토리 등 문화 콘텐츠 제작을 하고 싶다.',emoji:'🎬',character:'콘텐츠 크리에이터'},
+      { id:16,type:'A',text:'공연, 패션, 공간 디자인 등 시각/청각적 아름다움 창출에 매력을 느낀다.',emoji:'✨',character:'디자이너'},
+      { id:17,type:'A',text:'정해진 규칙 없이 자유롭고 개성 있는 작업 환경을 선호한다.',emoji:'🦋',character:'자유 영혼'},
+      { id:18,type:'A',text:'대중에게 재미와 감동을 주는 창작물이 만드는 것이 목표다.',emoji:'🎭',character:'감성 전달자'},
+      // S
+      { id:19,type:'S',text:'취약계층을 돕고 문제를 해결해주는 일에 보람을 느낀다.',emoji:'🤝',character:'사회 봉사자'},
+      { id:20,type:'S',text:'주변의 고민을 듣고 정서적으로 지지하는 역할이 편안하다.',emoji:'💬',character:'심리 상담가'},
+      { id:21,type:'S',text:'지식/기술을 재미있고 효과적으로 가르치는 방법을 연구한다.',emoji:'📚',character:'교육 코치'},
+      { id:22,type:'S',text:'의료/보건 분야에서 건강과 회복을 돕는 일을 하고 싶다.',emoji:'⚕️',character:'헬스케어 전문가'},
+      { id:23,type:'S',text:'다양한 문화와 협력해 공동 목표를 달성하는 활동을 좋아한다.',emoji:'🌍',character:'글로벌 협력가'},
+      { id:24,type:'S',text:'온라인 커뮤니티 운영, 의견 수렴, 갈등 조정을 즐긴다.',emoji:'💻',character:'커뮤니티 매니저'},
+      // E
+      { id:25,type:'E',text:'새로운 사업/제품을 기획하고 설득해 판매하는 일을 잘한다.',emoji:'💡',character:'스타트업 CEO'},
+      { id:26,type:'E',text:'팀에서 리더 역할로 동기를 부여하고 이끄는 것을 좋아한다.',emoji:'👑',character:'카리스마 리더'},
+      { id:27,type:'E',text:'투자/재테크 등 경제적 이익을 창출하는 활동에 관심이 많다.',emoji:'💰',character:'핀테크 전문가'},
+      { id:28,type:'E',text:'발표/연설에 자신 있고 설득력을 높이는 법을 고민한다.',emoji:'🎤',character:'협상가'},
+      { id:29,type:'E',text:'글로벌 트렌드를 파악하고 새로운 비즈니스 기회를 찾고 싶다.',emoji:'🌐',character:'국제 비즈니스맨'},
+      { id:30,type:'E',text:'개인 브랜딩/소셜미디어로 영향력을 키우는 활동을 즐긴다.',emoji:'📱',character:'인플루언서'},
+      // C
+      { id:31,type:'C',text:'복잡한 서류/DB를 분류하고 체계적으로 관리하는 일에 능숙하다.',emoji:'🗂️',character:'정보 관리자'},
+      { id:32,type:'C',text:'정해진 절차에 따라 업무를 완벽히 처리할 때 만족한다.',emoji:'✅',character:'행정 전문가'},
+      { id:33,type:'C',text:'재무/예산 등 숫자 다루는 일을 좋아한다.',emoji:'💵',character:'회계사'},
+      { id:34,type:'C',text:'정보보안·개인정보 보호 등 시스템 안전성 확보에 책임감을 느낀다.',emoji:'🔒',character:'보안 전문가'},
+      { id:35,type:'C',text:'문서 작성과 포맷팅 등 정보를 깔끔하게 정리한다.',emoji:'📋',character:'기획 비서'},
+      { id:36,type:'C',text:'자동화 도구/업무 관리 시스템으로 효율을 높이는 방법을 찾는다.',emoji:'⚡',character:'업무 효율화 전문가'},
     ];
 
-    /* 추천 매핑(조합 없을 때는 단일형에서 합성) */
-    const careerPaths={
-      IA:{title:'AI 기반 콘텐츠 크리에이터',jobs:['데이터 시각화 디자이너','UX 리서치','미디어 아티스트','AI 아트 디렉터'],roadmap:{high:'미술, 정보, 미디어',college:'융합디자인/데이터사이언스/미디어',experience:'UI·UX 공모전, 포트폴리오'},skills:['창의적 문제해결','데이터 리터러시','디자인 사고'],growth:85},
-      IE:{title:'AI 스타트업 전략가',jobs:['AI 기획자','테크 PM','비즈니스 애널리스트','디지털 컨설턴트'],roadmap:{high:'수학·컴퓨터·경제',college:'경영경제/컴퓨터/산업공학',experience:'창업동아리·케이스컴프'},skills:['논리적 사고','시장 분석','커뮤니케이션'],growth:92},
-      AI:{title:'AI 엔지니어 겸 UX디자이너',jobs:['ML 리서처','챗봇 개발자','데이터 시각화','AI 인터랙션'],roadmap:{high:'수학·과학·정보',college:'컴공/AI/통계',experience:'코딩대회·AI 프로젝트'},skills:['알고리즘','수학적 사고','창의적 해결'],growth:78},
-      SE:{title:'소셜 임팩트 리더',jobs:['사회적기업가','CSR 매니저','임팩트 투자'],roadmap:{high:'사회문화·윤리·경제',college:'사회복지/경영/국제개발',experience:'봉사·사회적경제 동아리'},skills:['공감','리더십','문제해결'],growth:73},
-      RI:{title:'첨단 로봇 엔지니어',jobs:['로봇공학자','IoT 개발자','바이오 엔지니어'],roadmap:{high:'물리·화학·정보',college:'기계/전자/로봇',experience:'메이커/로봇 대회'},skills:['공학','설계','프로그래밍'],growth:88},
-      IT:{title:'인간 중심 연구자',jobs:['심리학자','교육 연구원','신경과학자','UX 리서치'],roadmap:{high:'심리·사회문화·생명과학',college:'심리/교육/인지과학',experience:'심리 실험·사회 조사'},skills:['논리','공감','연구 설계'],growth:76},
-      IC:{title:'데이터 사이언티스트',jobs:['데이터 애널리스트','통계전문가','정량분석가'],roadmap:{high:'수학·정보·경제',college:'통계/수학/정보사회',experience:'데이터톤/리서치'},skills:['통계','프로그래밍','비즈니스 이해'],growth:95},
-      AS:{title:'예술 치료 전문가',jobs:['음악/미술 치료사','문화기획자'],roadmap:{high:'음악·미술·심리',college:'예술치료/문예창작/심리',experience:'예술 봉사·커뮤니티'},skills:['창의성','공감','정서 표현'],growth:71},
-      AC:{title:'디지털 아카이브 전문가',jobs:['큐레이터','디지털 아카이비스트','콘텐츠 에디터'],roadmap:{high:'미술·역사·정보',college:'문화콘텐츠/박물관/문헌정보',experience:'전시·아카이빙'},skills:['정보학','패턴 인식','창의성'],growth:68},
-      SC:{title:'헬스케어 서비스 관리자',jobs:['공공기관 관리자','헬스케어 매니저'],roadmap:{high:'사회문화·생명과학·정보',college:'보건행정/사회복지/경영',experience:'의료봉사·서비스 기획'},skills:['소통','체계적 관리','문제 해결'],growth:82},
-      RA:{title:'메이커 크리에이터',jobs:['제품 디자이너','3D 모델러','건축/인테리어'],roadmap:{high:'미술·기술·정보',college:'산디/기계/건축',experience:'모형 제작·메이커'},skills:['디자인','수리','제품 분석'],growth:82},
-      EC:{title:'글로벌 무역 관리자',jobs:['국제 무역인','영업 관리자','글로벌 마케터'],roadmap:{high:'사회문화·경제·영어',college:'국제통상/경영/국제관계',experience:'무역 프로그램·교환학생'},skills:['협상력','국제 감각','분석'],growth:79},
-      RS:{title:'현장 서비스/공공안전 전문가',jobs:['응급구조·소방','보건의료 기술직','설비/안전관리','재난 대응'],roadmap:{high:'생명과학·보건·기술가정',college:'보건행정/응급구조/산업안전',experience:'의료·안전 봉사, 실습'},skills:['대인 공감','현장 해결','기술 숙련'],growth:80}
+    const careerPaths = {
+      IA:{title:'AI 기반 콘텐츠 크리에이터',jobs:['데이터 시각화 디자이너','UX 리서처','미디어 아티스트','AI 아트 디렉터'],roadmap:{high:'미술, 정보, 미디어 교과 선택',college:'융합디자인, 데이터사이언스, 미디어 커뮤니케이션',experience:'UI/UX 공모전, 포트폴리오, 디자인 씽킹 워크숍'},skills:['창의적 문제해결','데이터 리터러시','디자인 사고'],growth:85},
+      IE:{title:'AI 스타트업 전략가',jobs:['AI 기획자','테크 PM','비즈니스 애널리스트','디지털 컨설턴트'],roadmap:{high:'수학, AI 기초, 경제',college:'경영정보, 컴공, 산업공학',experience:'창업 동아리, BM 프로젝트, 해커톤'},skills:['논리적 사고','비즈니스 감각','데이터 분석'],growth:92},
+      AE:{title:'브랜드 마케터/인플루언서',jobs:['디지털 마케터','브랜드 매니저','콘텐츠 기획자','SNS 전략가'],roadmap:{high:'화작, 심리, 사회문화',college:'광고홍보, 문화콘텐츠, 마케팅',experience:'SNS 운영, 마케팅 인턴, 브랜딩 프로젝트'},skills:['창의성','커뮤니케이션','트렌드 분석'],growth:78},
+      SE:{title:'소셜 임팩트 리더',jobs:['사회적기업가','CSR 매니저','비영리 기획자','임팩트 투자'],roadmap:{high:'사회문화, 윤리, 경제',college:'사회복지, 경영, 국제개발',experience:'봉사 리딩, 사회혁신 캠프, 크라우드펀딩'},skills:['공감','리더십','문제해결'],growth:73},
+      RI:{title:'첨단 기술 연구자',jobs:['로봇공학자','IoT 개발자','바이오 엔지니어','우주항공 기술자'],roadmap:{high:'물리, 화학, 정보',college:'기계/전자/생명공학',experience:'과학동아리, 발명, 연구 프로젝트'},skills:['기술 이해','실험 설계','논리적 사고'],growth:88},
+      RS:{title:'헬스케어 기술 전문가',jobs:['의료기기 엔지니어','재활 치료사','스포츠 트레이너','응급구조사'],roadmap:{high:'생명과학, 체육, 보건',college:'의공학, 물리치료, 응급구조',experience:'의료 봉사, 응급처치 자격증, 실습'},skills:['신체 활동성','공감','위기 대응'],growth:81},
+      IS:{title:'인간 중심 연구자',jobs:['심리학자','교육 연구원','인지과학자','UX 리서처'],roadmap:{high:'심리, 사회문화, 생명과학',college:'심리/교육/인지과학',experience:'상담 봉사, 연구 보조, 사용자 조사'},skills:['분석력','공감','연구 설계'],growth:76},
+      IC:{title:'데이터 사이언티스트',jobs:['빅데이터 분석가','AI 엔지니어','정보보안 연구원','퀀트'],roadmap:{high:'수학, 정보, 통계',college:'통계, 컴공, 데이터사이언스',experience:'데분 공모전, 코딩 부트캠프, 오픈소스'},skills:['데이터 분석','프로그래밍','논리적 사고'],growth:95},
+      AS:{title:'힐링 콘텐츠 크리에이터',jobs:['음악/예술 치료사','문화기획자','커뮤니티 아티스트'],roadmap:{high:'음악, 미술, 심리',college:'예술치료, 문화예술교육, 상담',experience:'예술 봉사, 치료 프로그램 보조'},skills:['창의성','공감','감성 표현'],growth:71},
+      AC:{title:'디지털 아카이브 전문가',jobs:['큐레이터','디지털 아키비스트','콘텐츠 매니저','박물관 전문가'],roadmap:{high:'미술, 역사, 정보',college:'문헌정보/박물관학/문화재학',experience:'전시 기획, 아카이빙 프로젝트'},skills:['창의성','체계적 사고','디지털 리터러시'],growth:68},
+      SC:{title:'행정 서비스 전문가',jobs:['공무원','인사 담당','행정사','비서'],roadmap:{high:'사회문화, 정법, 경제',college:'행정/경영/법',experience:'학생회, 행정 인턴, 공모전'},skills:['조직력','공감','업무 처리'],growth:65},
+      EC:{title:'금융 전략가',jobs:['재무 분석가','투자 상담','회계사','세무사'],roadmap:{high:'경제, 수학, 정보',college:'경영/회계/금융',experience:'모의투자, 자격증, 인턴'},skills:['리더십','수리 능력','재무 분석'],growth:82},
+      RA:{title:'메이커 크리에이터',jobs:['제품 디자이너','3D 모델러','건축가','인테리어 디자이너'],roadmap:{high:'미술, 기술가정, 물리',college:'산업디자인/건축/실내디자인',experience:'메이커 동아리, 디자인 공모전'},skills:['기술','창의성','공간 감각'],growth:79},
+      RC:{title:'스마트 시스템 운영자',jobs:['설비/품질/생산 관리자','시스템 엔지니어'],roadmap:{high:'기술가정, 정보, 수학',college:'산업/기계/전기공학',experience:'현장 실습, 자동화 프로젝트'},skills:['기술','체계적 사고','품질 관리'],growth:74},
+      RE:{title:'현장 리더',jobs:['건설 감독','물류 관리자','안전 관리자','스포츠 에이전트'],roadmap:{high:'체육, 기술가정, 경영',college:'건설/물류/안전공학',experience:'현장 실습, 안전 교육, PM'},skills:['신체 활동','리더십','위기 관리'],growth:72},
     };
 
-    const singleTypeSuggest={
-      R:{title:'현장 기술 전문가',jobs:['설비·정비 기술자','품질관리','안전·산업기사'],roadmap:{high:'물리/화학/정보',college:'기계/전기/산업안전',experience:'메이커/현장 실습'},skills:['수리 능력','실행력','문제 해결'],growth:78},
-      I:{title:'연구·분석 전문가',jobs:['연구원','데이터 분석','품질분석'],roadmap:{high:'수학/과학/정보',college:'공학/통계/자연과학',experience:'리서치/데이터톤'},skills:['분석','논리','실험 설계'],growth:80},
-      A:{title:'크리에이티브 메이커',jobs:['콘텐츠 디자이너','영상/사운드 제작'],roadmap:{high:'미술/음악/정보',college:'디자인/콘텐츠',experience:'포트폴리오/공모전'},skills:['창의성','표현력','도구 활용'],growth:72},
-      S:{title:'교육·상담·커뮤니티 전문가',jobs:['상담/교육','사회복지','코디네이터'],roadmap:{high:'사회/윤리/국어',college:'교육/심리/사회복지',experience:'봉사/멘토링'},skills:['공감','의사소통','협업'],growth:76},
-      E:{title:'비즈니스 리더',jobs:['기획/마케팅','영업/창업'],roadmap:{high:'경제/사회/영어',college:'경영/경제',experience:'동아리/창업캠프'},skills:['리더십','설득','전략'],growth:83},
-      C:{title:'운영·관리 전문가',jobs:['회계/총무','데이터 관리'],roadmap:{high:'수학/정보/사회',college:'경영/회계/행정',experience:'사무 실습/ERP'},skills:['정확성','체계화','도구 활용'],growth:74}
-    };
-
-    /* 상태 */
-    let idx=0; const answers=[];
-    const app=document.getElementById('app');
-    const bar=document.getElementById('progressBar');
-    const countText=document.getElementById('countText');
-    const prevBtn=document.getElementById('prevBtn');
-    const nextBtn=document.getElementById('nextBtn');
-
-    function renderQuestion(){
-      const q=questions[idx];
-      bar.style.width=Math.round(((idx+1)/questions.length)*100)+'%';
-      countText.textContent=`${idx+1} / ${questions.length}`;
-      nextBtn.textContent='다음 →';
-      prevBtn.classList.toggle('hide', idx===0);
-
-      app.innerHTML=`
-        <div class="card">
-          <div class="q-emoji">${q.emoji}</div>
-          <div class="chip">${typeInfo[q.type].name} · ${q.character}</div>
-          <p class="qtext">${q.text}</p>
-          <div class="grid">
-            <button class="btn opt opt1" data-v="5">매우 그렇다</button>
-            <button class="btn opt opt2" data-v="4">그렇다</button>
-            <button class="btn opt opt3" data-v="3">보통이다</button>
-            <button class="btn opt opt4" data-v="2">그렇지 않다</button>
-            <button class="btn opt opt5" data-v="1">전혀 그렇지 않다</button>
-          </div>
-        </div>`;
-      app.querySelectorAll('.opt').forEach(b=>{
-        b.addEventListener('click',e=>{
-          const v=Number(e.currentTarget.dataset.v);
-          answers.push({type:q.type,value:v});
-          if(idx<questions.length-1){ idx++; renderQuestion(); }
-          else{ renderResult(); }
-        });
-      });
+    /* ================= 유틸 (저장) ================= */
+    async function saveResultsAsJPG(){
+      const node = document.getElementById('result-card');
+      const canvas = await html2canvas(node, {scale:2, backgroundColor:'#ffffff'});
+      const link = document.createElement('a');
+      link.download = 'career-result.jpg';
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.click();
     }
 
-    function calc(){
-      const scores={R:0,I:0,A:0,S:0,E:0,C:0,T:0};
-      answers.forEach(a=>scores[a.type]+=a.value);
-      const ordered=Object.entries(scores).sort(([,a],[,b])=>b-a);
-      const top2=ordered.filter(([t])=>t!=='T').slice(0,2).map(([t])=>t);
-      const code=top2.join(''); const flip=top2.slice().reverse().join('');
-      return {scores, top2, code, flip};
-    }
+    /* ================= App ================= */
+    function App(){
+      const [page, setPage] = useState('intro');   // 'intro' | 'survey' | 'results'
+      const [idx, setIdx] = useState(0);
+      const [answers, setAnswers] = useState({});
+      const [results, setResults] = useState(null);
 
-    function synthesizeCareer(top2){
-      const [t1,t2]=top2; const s1=singleTypeSuggest[t1], s2=singleTypeSuggest[t2];
-      return {
-        title:`${typeInfo[t1].name}×${typeInfo[t2].name} 융합 진로`,
-        jobs:[...(s1?.jobs||[]),(s2?.jobs||[])].flat().slice(0,4),
-        roadmap:{
-          high:[s1?.roadmap?.high,s2?.roadmap?.high].filter(Boolean).join(' / '),
-          college:[s1?.roadmap?.college,s2?.roadmap?.college].filter(Boolean).join(' / '),
-          experience:[s1?.roadmap?.experience,s2?.roadmap?.experience].filter(Boolean).join(' / ')
-        },
-        skills:[...(s1?.skills||[]),(s2?.skills||[])].flat().slice(0,3),
-        growth:Math.round(((s1?.growth||75)+(s2?.growth||75))/2)
+      const goSurvey = () => { setPage('survey'); setIdx(0); window.scrollTo({top:0,behavior:'smooth'}); };
+      const goIntro  = () => { setPage('intro'); setIdx(0); setAnswers({}); setResults(null); window.scrollTo({top:0}); };
+
+      const handleAnswer = (qid, value) => setAnswers(prev => ({...prev, [qid]: value}));
+
+      const calcResults = () => {
+        const scores = {R:0,I:0,A:0,S:0,E:0,C:0};
+        questions.forEach(q => { if(answers[q.id]) scores[q.type]+=answers[q.id]; });
+        const sorted = Object.entries(scores)
+          .sort((a,b)=>b[1]-a[1])
+          .map(([type,score])=>({type,score,percentage:(score/30)*100}));
+        const top = sorted.slice(0,3);
+        const code = top[0].type + top[1].type;
+        let career = careerPaths[code] || careerPaths[code.split('').reverse().join('')];
+        if(!career){
+          const fallback = ['IA','IE','RI','IS','IC','AE','SE'].find(c => c.includes(top[0].type));
+          career = careerPaths[fallback||'IA'];
+        }
+        setResults({topTypes:top, allScores:sorted, code, career});
+        setPage('results');
+        window.scrollTo({top:0,behavior:'smooth'});
       };
-    }
 
-    function pickImage(code, top2){
-      return careerImages[code] || careerImages[code.split('').reverse().join('')]
-          || careerImages[top2?.[0]] || careerImages[top2?.[1]] || '';
-    }
+      /* 공통 카드 래퍼: 화면 크기/여백 통일 */
+      const Card = ({children}) => (
+        <div className="page-wrap mx-auto">
+          <div className="export-surface bg-white/95 backdrop-blur rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10">
+            {children}
+          </div>
+        </div>
+      );
 
-    function renderResult(){
-      const {scores, top2, code, flip}=calc();
-      bar.style.width='100%';
-      countText.textContent=`${questions.length} / ${questions.length}`;
-      nextBtn.textContent='다시 시작';
-      prevBtn.classList.add('hide');
-
-      const career = careerPaths[code] || careerPaths[flip] || synthesizeCareer(top2);
-      const showCode = (careerPaths[code]||careerPaths[flip]) ? (careerPaths[code]?code:flip) : code;
-      const showImageSrc = pickImage(showCode, top2);
-
-      const scoreRows=Object.entries(scores)
-        .filter(([t])=>t!=='T')
-        .sort(([,a],[,b])=>b-a)
-        .map(([t,sc])=>{
-          const max=questions.filter(q=>q.type===t).length*5||1;
-          const pct=Math.round((sc/max)*100);
-          const color=typeInfo[t].color;
-          return `<div class="score-row">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <span class="pill" style="background:${color}">${typeInfo[t].name}</span>
-              <strong>${sc}점</strong>
-            </div>
-            <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${color}"></div></div>
-          </div>`;
-        }).join('');
-
-      app.innerHTML=`
-        <div class="card">
-          <h2 class="result-head">설문 결과</h2>
-          <div class="result-sub">당신의 유형: <strong style="color:var(--pri);font-size:20px">${top2.join('')}</strong></div>
-
-          <div class="hero ${showImageSrc ? 'withImage' : ''}">
-            ${showImageSrc ? `
-              <div class="center">
-                <img src="${showImageSrc}" alt="추천 직군 캐릭터" onerror="this.style.display='none'">
-                <div class="ai-note">AI로 생성된 이미지입니다.</div>
-              </div>` : ''}
-
-            <div class="grid">
-              <div class="recommend">
-                <div class="big">추천 진로 · 성장 전망 ${career.growth}%</div>
-                <div style="font-size:18px">${career.title}</div>
-              </div>
-
-              <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:16px">
-                <div class="score">
-                  <div class="section-title">관련 직업</div>
-                  <ul class="list">${career.jobs.map(j=>`<li>${j}</li>`).join('')}</ul>
-                </div>
-                <div class="score">
-                  <div class="section-title">필요 역량</div>
-                  <ul class="list">${career.skills.map(s=>`<li>${s}</li>`).join('')}</ul>
-                </div>
-              </div>
+      /* ===== Intro ===== */
+      const Intro = () => (
+        <Card>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-14 h-14 rounded-2xl bg-violet-100 text-violet-500 flex items-center justify-center text-3xl">✨</div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">진로 관심사 설문조사</h1>
+              <p className="text-gray-600 mt-1">당신의 미래를 위한 첫 걸음</p>
             </div>
           </div>
 
-          <div class="fullwidth">
-            <div class="card">
-              <div class="section-title">진로 로드맵</div>
-              <ul class="list">
-                <li><strong>고등학교:</strong> ${career.roadmap.high}</li>
-                <li><strong>대학:</strong> ${career.roadmap.college}</li>
-                <li><strong>경험 쌓기:</strong> ${career.roadmap.experience}</li>
-              </ul>
-            </div>
-
-            <div class="card">
-              <div class="section-title">유형별 점수</div>
-              ${scoreRows}
-            </div>
+          <div className="rounded-2xl bg-gradient-to-b from-violet-50 to-pink-50 p-5 sm:p-6 mb-6">
+            <h2 className="font-bold text-lg mb-3">📋 설문 안내</h2>
+            <ul className="text-gray-700 space-y-2 text-[15px]">
+              <li>• 총 <b>36개</b> 문항에 답변해주세요.</li>
+              <li>• 각 문항은 <b>1~5점</b>으로 평가합니다.</li>
+              <li>• 솔직한 답변이 가장 정확한 결과를 만듭니다.</li>
+            </ul>
           </div>
-        </div>`;
+
+          <button
+            onClick={goSurvey}
+            className="w-full sm:w-auto px-6 sm:px-8 py-3 rounded-full font-bold text-white bg-gradient-to-r from-fuchsia-600 to-violet-600 hover:opacity-95 active:scale-[.99] transition"
+            aria-label="설문 시작하기"
+          >
+            설문 시작하기 →
+          </button>
+        </Card>
+      );
+
+      /* ===== Survey ===== */
+      const q = questions[idx];
+      const progress = Math.round(((idx+1)/questions.length)*100);
+      const answered = answers[q?.id] !== undefined;
+      const Survey = () => (
+        <Card>
+          <div className="mb-4 flex items-center justify-between">
+            <div className="text-sm font-semibold text-gray-600">{idx+1} / {questions.length}</div>
+            <div className="text-sm font-semibold text-violet-600">{progress}%</div>
+          </div>
+          <div className="w-full h-2 bg-gray-200 rounded-full mb-6">
+            <div className="h-2 rounded-full bg-gradient-to-r from-violet-600 to-pink-600" style={{width:`${progress}%`}}></div>
+          </div>
+
+          <div className="text-center mb-6">
+            <div className={`inline-block ${typeInfo[q.type].color} text-white px-4 py-1 rounded-full text-xs font-bold mb-3`}>
+              {typeInfo[q.type].name} ({q.type})
+            </div>
+            <div className="text-6xl mb-4">{q.emoji}</div>
+            <h2 className="text-xl sm:text-2xl font-bold leading-relaxed">{q.text}</h2>
+            <p className="text-gray-500 text-sm mt-1">💼 {q.character}</p>
+          </div>
+
+          <div className="space-y-2 mb-6">
+            {[
+              {value:5,label:'매우 그렇다', color:'from-green-500 to-emerald-600'},
+              {value:4,label:'그렇다',      color:'from-blue-500 to-cyan-600'},
+              {value:3,label:'보통이다',    color:'from-yellow-500 to-orange-500'},
+              {value:2,label:'그렇지 않다', color:'from-orange-500 to-red-500'},
+              {value:1,label:'전혀 그렇지 않다', color:'from-red-500 to-pink-600'},
+            ].map(opt=>(
+              <button key={opt.value}
+                onClick={()=>handleAnswer(q.id,opt.value)}
+                className={`w-full p-4 rounded-xl font-semibold transition ${
+                  answers[q.id]===opt.value
+                    ? `bg-gradient-to-r ${opt.color} text-white shadow`
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}>
+                <div className="flex items-center justify-between">
+                  <span>{opt.label}</span><span className="text-xl">{opt.value}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t">
+            <button onClick={()=>setIdx(Math.max(0, idx-1))}
+              disabled={idx===0}
+              className="px-5 py-2 rounded-full font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-30">
+              ← 이전
+            </button>
+
+            {idx < questions.length-1 ? (
+              <button onClick={()=>{ if(answered){ setIdx(idx+1); window.scrollTo({top:0,behavior:'smooth'});} }}
+                className={`px-6 py-2 rounded-full font-semibold ${answered ? 'bg-gradient-to-r from-violet-600 to-pink-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}>
+                다음 →
+              </button>
+            ) : (
+              <button onClick={calcResults}
+                disabled={Object.keys(answers).length < questions.length}
+                className={`px-6 py-2 rounded-full font-semibold ${Object.keys(answers).length===questions.length ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}>
+                결과 보기 ✨
+              </button>
+            )}
+          </div>
+        </Card>
+      );
+
+      /* ===== Results ===== */
+      const Results = () => {
+        const {topTypes, allScores, career} = results;
+        return (
+          <Card>
+            <div id="result-card">
+              <div className="text-center mb-6">
+                <div className="inline-block p-3 bg-white rounded-full shadow mb-4">🏆</div>
+                <h1 className="text-3xl font-extrabold mb-1">검사 완료!</h1>
+                <p className="text-gray-600">당신만의 흥미 코드를 발견했어요</p>
+              </div>
+
+              <div className="rounded-2xl border p-5 mb-6">
+                <h2 className="text-lg font-bold text-center mb-4">나의 흥미 코드 Top3</h2>
+                <div className="flex items-center justify-center gap-3">
+                  {topTypes.map((t, i)=>(
+                    <div key={t.type} className="text-center">
+                      <div className="text-2xl mb-1">{['🥇','🥈','🥉'][i]}</div>
+                      <div className={`${typeInfo[t.type].color} text-white px-5 py-3 rounded-xl text-2xl font-extrabold`}>{t.type}</div>
+                      <div className="mt-1 font-semibold">{typeInfo[t.type].name}</div>
+                      <div className="text-xs text-gray-500">{Math.round(t.percentage)}%</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-gradient-to-b from-violet-50 to-pink-50 p-5 mb-6">
+                <h3 className="font-bold text-center mb-3">📊 전체 유형 점수</h3>
+                <div className="space-y-2">
+                  {allScores.map(s=>(
+                    <div key={s.type}>
+                      <div className="flex justify-between text-sm font-semibold">
+                        <span>{typeInfo[s.type].name} ({s.type})</span>
+                        <span>{Math.round(s.percentage)}%</span>
+                      </div>
+                      <div className="h-3 bg-gray-200 rounded-full">
+                        <div className={`${typeInfo[s.type].color} h-3 rounded-full`} style={{width:`${s.percentage}%`}}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border p-5 mb-6">
+                <div className="text-center mb-4">
+                  <div className="inline-block bg-gradient-to-r from-violet-600 to-pink-600 text-white px-4 py-1 rounded-full text-sm font-bold">추천 진로</div>
+                </div>
+                <h3 className="text-2xl font-extrabold text-center mb-1">{career.title}</h3>
+                <p className="text-center text-gray-600 mb-4">당신의 흥미와 미래 트렌드가 만나는 직업</p>
+
+                <div className="grid sm:grid-cols-2 gap-3 mb-5">
+                  {career.jobs.map((j,i)=>(
+                    <div key={i} className="bg-white rounded-xl p-3 shadow-sm flex items-center gap-2">
+                      <span className="text-violet-600">›</span>
+                      <span className="font-semibold">{j}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-3">
+                  <div className="bg-green-50 border-l-4 border-green-500 rounded-r-xl p-4">
+                    <div className="font-bold mb-1">고등학교 단계</div>
+                    <p>{career.roadmap.high}</p>
+                  </div>
+                  <div className="bg-blue-50 border-l-4 border-blue-500 rounded-r-xl p-4">
+                    <div className="font-bold mb-1">대학 단계</div>
+                    <p>{career.roadmap.college}</p>
+                  </div>
+                  <div className="bg-purple-50 border-l-4 border-purple-500 rounded-r-xl p-4">
+                    <div className="font-bold mb-1">경험 및 활동</div>
+                    <p>{career.roadmap.experience}</p>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4 mt-5">
+                  <div className="bg-orange-50 rounded-2xl p-4">
+                    <h4 className="font-bold mb-2">⚡ 핵심 역량</h4>
+                    <ul className="space-y-1">{career.skills.map((s,i)=>(<li key={i} className="flex items-center gap-2"><span className="text-orange-500 font-bold">✓</span>{s}</li>))}</ul>
+                  </div>
+                  <div className="bg-emerald-50 rounded-2xl p-4">
+                    <h4 className="font-bold mb-2">📈 5년 후 전망</h4>
+                    <div className="text-center">
+                      <div className="text-4xl font-extrabold text-emerald-600 mb-1">+{career.growth}%</div>
+                      <div className="h-3 bg-white rounded-full">
+                        <div className="h-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600" style={{width:`${career.growth}%`}}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div> <!-- /result-card inner -->
+            </div> <!-- /result-card -->
+
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <button onclick="saveResultsAsJPG()"
+                className="px-5 py-3 rounded-full font-bold text-white bg-gradient-to-r from-fuchsia-600 to-violet-600">
+                결과 JPG로 저장
+              </button>
+              <button onClick={()=>{setPage('intro'); setIdx(0); setAnswers({}); setResults(null);}}
+                className="px-5 py-3 rounded-full font-bold bg-white shadow hover:bg-gray-50">
+                처음으로
+              </button>
+            </div>
+          </Card>
+        );
+      };
+
+      return (
+        <div className="space-y-6 sm:space-y-8">
+          {page==='intro'   && <Intro/>}
+          {page==='survey'  && <Survey/>}
+          {page==='results' && results && <Results/>}
+        </div>
+      );
     }
 
-    function resetSurvey(){ idx=0; answers.length=0; renderQuestion(); }
-
-    prevBtn.addEventListener('click', ()=>{ if(idx>0){ idx--; answers.pop(); renderQuestion(); } });
-    nextBtn.addEventListener('click', ()=>{
-      if(nextBtn.textContent.includes('다시 시작')){ resetSurvey(); return; }
-      if(idx<questions.length-1){ idx++; renderQuestion(); } else { renderResult(); }
-    });
-    window.addEventListener('keydown', e=>{
-      if(nextBtn.textContent.includes('다시 시작')) return;
-      if(e.key==='ArrowLeft' && idx>0){ idx--; answers.pop(); renderQuestion(); }
-      if(e.key==='ArrowRight'){ if(idx<questions.length-1){ idx++; renderQuestion(); } else { renderResult(); } }
-    });
-
-    renderQuestion();
+    ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
+    // 브라우저 전역 접근을 위해 저장 함수 노출
+    window.saveResultsAsJPG = saveResultsAsJPG;
   </script>
 </body>
 </html>
