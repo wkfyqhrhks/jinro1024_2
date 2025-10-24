@@ -5,81 +5,85 @@
   <title>진로 관심사 설문조사</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#7c3aed" />
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- React 18 -->
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <!-- Babel (런타임 트랜스파일) -->
   <script src="https://unpkg.com/@babel/standalone@7.26.2/babel.min.js"></script>
   <style>
-    :root{
-      --safe-top: env(safe-area-inset-top);
-      --safe-bottom: env(safe-area-inset-bottom);
-    }
+    :root{ --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom); }
     body{
-      padding-top: max(0px, var(--safe-top));
-      padding-bottom: max(0px, var(--safe-bottom));
+      padding-top:max(0px,var(--safe-top)); padding-bottom:max(0px,var(--safe-bottom));
       background: linear-gradient(135deg,#5b6ee1 0%, #a855f7 40%, #ec4899 100%);
       min-height: 100svh;
     }
-    .page-wrap{ max-width: 720px; }
-    .export-surface{ background:#ffffff; } /* JPG 저장 영역 흰 배경 고정 */
+    .page-wrap{ max-width:720px; }
+    .export-surface{ background:#fff; }
+    img.asset{ object-fit:cover; }
   </style>
 </head>
 <body class="font-sans text-gray-900 antialiased">
   <div id="app" class="px-4 sm:px-6 md:px-8 py-6 sm:py-10"></div>
 
-  <!-- 앱 코드 -->
   <script type="text/babel" data-presets="env,react">
-    const {useState} = React;
+    const { useState } = React;
 
+    /* ---------- helpers ---------- */
+    const assetUrl = (p) => `./assets/${p}`; // 서브경로에서도 안전
+    const loadAllImagesIn = async (root) => {
+      const imgs = Array.from(root.querySelectorAll('img'));
+      const waiters = imgs.filter(img => !img.complete).map(img => new Promise(res => {
+        img.onload = img.onerror = () => res();
+      }));
+      await Promise.all(waiters);
+    };
+
+    /* ---------- data ---------- */
     const typeInfo = {
-      R:{name:'실재형',color:'bg-blue-500'},
-      I:{name:'탐구형',color:'bg-purple-500'},
-      A:{name:'예술형',color:'bg-pink-500'},
-      S:{name:'사회형',color:'bg-green-500'},
-      E:{name:'진취형',color:'bg-orange-500'},
-      C:{name:'관습형',color:'bg-teal-500'},
+      R:{ name:'실재형', color:'bg-blue-500' },
+      I:{ name:'탐구형', color:'bg-purple-500' },
+      A:{ name:'예술형', color:'bg-pink-500' },
+      S:{ name:'사회형', color:'bg-green-500' },
+      E:{ name:'진취형', color:'bg-orange-500' },
+      C:{ name:'관습형', color:'bg-teal-500' },
     };
 
     const questions = [
-      { id:1,type:'R',text:'3D 프린터나 로봇과 같은 기계를 조작하여 결과물을 만드는 활동에 흥미를 느낀다.',emoji:'⚙️',character:'미래 엔지니어'},
-      { id:2,type:'R',text:'직접 몸을 움직여 야외에서 식물을 기르거나 동물을 돌보는 활동을 즐긴다.',emoji:'🌱',character:'바이오 전문가'},
-      { id:3,type:'R',text:'복잡하게 얽힌 전선이나 기계 장치의 문제를 찾아내고 수리하는 일에 몰두한다.',emoji:'🔧',character:'유지보수 기술자'},
-      { id:4,type:'R',text:'실제 건축물이나 인테리어 모형을 설계하고 제작하는 작업이 재미있다.',emoji:'🏗️',character:'스마트 건설가'},
-      { id:5,type:'R',text:'보안·소방·응급구조 등 신체 활동이 요구되는 일을 하고 싶다.',emoji:'🚨',character:'안전 요원'},
-      { id:6,type:'R',text:'VR 장비로 기계 작동 시뮬레이션을 경험하는 것이 좋다.',emoji:'🥽',character:'VR 트레이너'},
-      { id:7,type:'I',text:'데이터/통계를 분석해 숨겨진 규칙을 찾는 것에 흥미가 있다.',emoji:'📊',character:'빅데이터 분석가'},
-      { id:8,type:'I',text:'심리·뇌과학 등 복잡한 원리를 깊이 연구하고 싶다.',emoji:'🧠',character:'인지 과학자'},
-      { id:9,type:'I',text:'과학 실험과 가설 검증을 통해 지식을 발견하는 것이 즐겁다.',emoji:'🔬',character:'연구원'},
-      { id:10,type:'I',text:'AI 오류 원인을 논리적으로 파헤치고 해결하는 과정을 좋아한다.',emoji:'🤖',character:'AI 디버거'},
-      { id:11,type:'I',text:'미래 변화/우주 신비 등 미지의 영역에 질문을 던진다.',emoji:'🔭',character:'미래학자'},
-      { id:12,type:'I',text:'논리 게임/추리로 정보를 조합하고 결론을 내린다.',emoji:'🔍',character:'논리학자'},
-      { id:13,type:'A',text:'그림·음악·글쓰기 등 창의적으로 표현하는 것을 좋아한다.',emoji:'🎨',character:'멀티 아티스트'},
-      { id:14,type:'A',text:'디지털 드로잉/미디어아트 등 기술을 활용한 예술에 관심이 많다.',emoji:'💻',character:'미디어 아티스트'},
-      { id:15,type:'A',text:'영상 편집, 웹툰, 게임 스토리 등 문화 콘텐츠 제작을 하고 싶다.',emoji:'🎬',character:'콘텐츠 크리에이터'},
-      { id:16,type:'A',text:'공연·패션·공간 디자인에 매력을 느낀다.',emoji:'✨',character:'디자이너'},
-      { id:17,type:'A',text:'정해진 규칙 없이 자유로운 작업 환경을 선호한다.',emoji:'🦋',character:'자유 영혼'},
-      { id:18,type:'A',text:'대중에게 감동을 주는 창작물이 목표다.',emoji:'🎭',character:'감성 전달자'},
-      { id:19,type:'S',text:'도움을 필요로 하는 사람들을 돕는 일에 보람을 느낀다.',emoji:'🤝',character:'사회 봉사자'},
-      { id:20,type:'S',text:'주변의 고민을 듣고 정서적 지지를 해주는 역할이 편안하다.',emoji:'💬',character:'심리 상담가'},
-      { id:21,type:'S',text:'지식/기술을 효과적으로 가르치는 방법을 연구한다.',emoji:'📚',character:'교육 코치'},
-      { id:22,type:'S',text:'의료/보건 분야에서 건강과 회복을 돕고 싶다.',emoji:'⚕️',character:'헬스케어 전문가'},
-      { id:23,type:'S',text:'다양한 문화와 협력해 공동 목표를 달성하는 것을 좋아한다.',emoji:'🌍',character:'글로벌 협력가'},
-      { id:24,type:'S',text:'온라인 커뮤니티 운영과 갈등 조정을 즐긴다.',emoji:'💻',character:'커뮤니티 매니저'},
-      { id:25,type:'E',text:'새로운 사업/제품을 기획하고 설득해 판매하는 일을 잘한다.',emoji:'💡',character:'스타트업 CEO'},
-      { id:26,type:'E',text:'팀 리더로 동기를 부여하고 이끄는 것을 좋아한다.',emoji:'👑',character:'카리스마 리더'},
-      { id:27,type:'E',text:'투자/재테크 등 경제 활동에 관심이 많다.',emoji:'💰',character:'핀테크 전문가'},
-      { id:28,type:'E',text:'발표/연설에 자신 있고 설득력을 높이는 법을 고민한다.',emoji:'🎤',character:'협상가'},
-      { id:29,type:'E',text:'글로벌 트렌드를 파악하고 비즈니스 기회를 찾고 싶다.',emoji:'🌐',character:'국제 비즈니스맨'},
-      { id:30,type:'E',text:'개인 브랜딩/소셜미디어로 영향력을 키우는 활동을 즐긴다.',emoji:'📱',character:'인플루언서'},
-      { id:31,type:'C',text:'서류/DB를 체계적으로 분류·관리하는 일에 능숙하다.',emoji:'🗂️',character:'정보 관리자'},
-      { id:32,type:'C',text:'정해진 절차대로 완벽히 처리할 때 만족감을 느낀다.',emoji:'✅',character:'행정 전문가'},
-      { id:33,type:'C',text:'재무/예산 등 숫자를 다루는 일을 좋아한다.',emoji:'💵',character:'회계사'},
-      { id:34,type:'C',text:'정보보안·개인정보 보호 등 안전성 확보에 책임감을 느낀다.',emoji:'🔒',character:'보안 전문가'},
-      { id:35,type:'C',text:'문서 작성과 포맷팅을 깔끔하게 정리한다.',emoji:'📋',character:'기획 비서'},
-      { id:36,type:'C',text:'자동화 도구로 업무 효율을 높이는 방법을 찾는다.',emoji:'⚡',character:'업무 효율화 전문가'},
+      { id:1,type:'R',text:'3D 프린터나 로봇과 같은 기계를 조작하여 결과물을 만드는 활동에 흥미를 느낀다.',emoji:'⚙️',character:'미래 엔지니어' },
+      { id:2,type:'R',text:'직접 몸을 움직여 야외에서 식물을 기르거나 동물을 돌보는 활동을 즐긴다.',emoji:'🌱',character:'바이오 전문가' },
+      { id:3,type:'R',text:'복잡하게 얽힌 전선이나 기계 장치의 문제를 찾아내고 수리하는 일에 몰두한다.',emoji:'🔧',character:'유지보수 기술자' },
+      { id:4,type:'R',text:'실제 건축물이나 인테리어 모형을 설계하고 제작하는 작업이 재미있다.',emoji:'🏗️',character:'스마트 건설가' },
+      { id:5,type:'R',text:'보안·소방·응급구조 등 신체 활동이 요구되는 일을 하고 싶다.',emoji:'🚨',character:'안전 요원' },
+      { id:6,type:'R',text:'VR 장비로 기계 작동 시뮬레이션을 경험하는 것이 좋다.',emoji:'🥽',character:'VR 트레이너' },
+      { id:7,type:'I',text:'데이터/통계를 분석해 숨겨진 규칙을 찾는 것에 흥미가 있다.',emoji:'📊',character:'빅데이터 분석가' },
+      { id:8,type:'I',text:'심리·뇌과학 등 복잡한 원리를 깊이 연구하고 싶다.',emoji:'🧠',character:'인지 과학자' },
+      { id:9,type:'I',text:'과학 실험과 가설 검증을 통해 지식을 발견하는 것이 즐겁다.',emoji:'🔬',character:'연구원' },
+      { id:10,type:'I',text:'AI 오류 원인을 논리적으로 파헤치고 해결하는 과정을 좋아한다.',emoji:'🤖',character:'AI 디버거' },
+      { id:11,type:'I',text:'미래 변화/우주 신비 등 미지의 영역에 질문을 던진다.',emoji:'🔭',character:'미래학자' },
+      { id:12,type:'I',text:'논리 게임/추리로 정보를 조합하고 결론을 내린다.',emoji:'🔍',character:'논리학자' },
+      { id:13,type:'A',text:'그림·음악·글쓰기 등 창의적으로 표현하는 것을 좋아한다.',emoji:'🎨',character:'멀티 아티스트' },
+      { id:14,type:'A',text:'디지털 드로잉/미디어아트 등 기술을 활용한 예술에 관심이 많다.',emoji:'💻',character:'미디어 아티스트' },
+      { id:15,type:'A',text:'영상 편집, 웹툰, 게임 스토리 등 문화 콘텐츠 제작을 하고 싶다.',emoji:'🎬',character:'콘텐츠 크리에이터' },
+      { id:16,type:'A',text:'공연·패션·공간 디자인에 매력을 느낀다.',emoji:'✨',character:'디자이너' },
+      { id:17,type:'A',text:'정해진 규칙 없이 자유로운 작업 환경을 선호한다.',emoji:'🦋',character:'자유 영혼' },
+      { id:18,type:'A',text:'대중에게 감동을 주는 창작물이 목표다.',emoji:'🎭',character:'감성 전달자' },
+      { id:19,type:'S',text:'도움을 필요로 하는 사람들을 돕는 일에 보람을 느낀다.',emoji:'🤝',character:'사회 봉사자' },
+      { id:20,type:'S',text:'주변의 고민을 듣고 정서적 지지를 해주는 역할이 편안하다.',emoji:'💬',character:'심리 상담가' },
+      { id:21,type:'S',text:'지식/기술을 효과적으로 가르치는 방법을 연구한다.',emoji:'📚',character:'교육 코치' },
+      { id:22,type:'S',text:'의료/보건 분야에서 건강과 회복을 돕고 싶다.',emoji:'⚕️',character:'헬스케어 전문가' },
+      { id:23,type:'S',text:'다양한 문화와 협력해 공동 목표를 달성하는 것을 좋아한다.',emoji:'🌍',character:'글로벌 협력가' },
+      { id:24,type:'S',text:'온라인 커뮤니티 운영과 갈등 조정을 즐긴다.',emoji:'💻',character:'커뮤니티 매니저' },
+      { id:25,type:'E',text:'새로운 사업/제품을 기획하고 설득해 판매하는 일을 잘한다.',emoji:'💡',character:'스타트업 CEO' },
+      { id:26,type:'E',text:'팀 리더로 동기를 부여하고 이끄는 것을 좋아한다.',emoji:'👑',character:'카리스마 리더' },
+      { id:27,type:'E',text:'투자/재테크 등 경제 활동에 관심이 많다.',emoji:'💰',character:'핀테크 전문가' },
+      { id:28,type:'E',text:'발표/연설에 자신 있고 설득력을 높이는 법을 고민한다.',emoji:'🎤',character:'협상가' },
+      { id:29,type:'E',text:'글로벌 트렌드를 파악하고 비즈니스 기회를 찾고 싶다.',emoji:'🌐',character:'국제 비즈니스맨' },
+      { id:30,type:'E',text:'개인 브랜딩/소셜미디어로 영향력을 키우는 활동을 즐긴다.',emoji:'📱',character:'인플루언서' },
+      { id:31,type:'C',text:'서류/DB를 체계적으로 분류·관리하는 일에 능숙하다.',emoji:'🗂️',character:'정보 관리자' },
+      { id:32,type:'C',text:'정해진 절차대로 완벽히 처리할 때 만족감을 느낀다.',emoji:'✅',character:'행정 전문가' },
+      { id:33,type:'C',text:'재무/예산 등 숫자를 다루는 일을 좋아한다.',emoji:'💵',character:'회계사' },
+      { id:34,type:'C',text:'정보보안·개인정보 보호 등 안전성 확보에 책임감을 느낀다.',emoji:'🔒',character:'보안 전문가' },
+      { id:35,type:'C',text:'문서 작성과 포맷팅을 깔끔하게 정리한다.',emoji:'📋',character:'기획 비서' },
+      { id:36,type:'C',text:'자동화 도구로 업무 효율을 높이는 방법을 찾는다.',emoji:'⚡',character:'업무 효율화 전문가' },
     ];
 
     const careerPaths = {
@@ -100,15 +104,7 @@
       RE:{title:'현장 리더',jobs:['건설 감독','물류 관리자','안전 관리자','스포츠 에이전트'],roadmap:{high:'체육, 기술가정, 경영',college:'건설/물류/안전공학',experience:'현장 실습, 안전 교육, PM'},skills:['신체 활동','리더십','위기 관리'],growth:72},
     };
 
-    async function saveResultsAsJPG(){
-      const node = document.getElementById('result-card');
-      const canvas = await html2canvas(node, {scale:2, backgroundColor:'#ffffff'});
-      const link = document.createElement('a');
-      link.download = 'career-result.jpg';
-      link.href = canvas.toDataURL('image/jpeg', 0.95);
-      link.click();
-    }
-
+    /* ---------- app ---------- */
     function App(){
       const [page, setPage] = React.useState('intro');
       const [idx, setIdx] = React.useState(0);
@@ -140,7 +136,7 @@
 
       const Card = ({children}) => (
         <div className="page-wrap mx-auto">
-          <div className="export-surface bg-white/95 backdrop-blur rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10">
+          <div className="export-surface rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10">
             {children}
           </div>
         </div>
@@ -193,7 +189,15 @@
             <div className={`inline-block ${typeInfo[q.type].color} text-white px-4 py-1 rounded-full text-xs font-bold mb-3`}>
               {typeInfo[q.type].name} ({q.type})
             </div>
-            <div className="text-6xl mb-4">{q.emoji}</div>
+            <!-- 유형 대표 이미지 (선택). 없으면 숨김 -->
+            <img
+              src={assetUrl(`riasec/${q.type}.png`)}
+              onError={(e)=>{e.currentTarget.style.display='none';}}
+              alt=""
+              className="asset mx-auto mb-4 rounded-2xl w-full max-w-[420px] h-44"
+              crossOrigin="anonymous"
+            />
+            <div className="text-6xl mb-3">{q.emoji}</div>
             <h2 className="text-xl sm:text-2xl font-bold leading-relaxed">{q.text}</h2>
             <p className="text-gray-500 text-sm mt-1">💼 {q.character}</p>
           </div>
@@ -207,7 +211,7 @@
               {value:1,label:'전혀 그렇지 않다', color:'from-red-500 to-pink-600'},
             ].map(opt=>(
               <button key={opt.value}
-                onClick={()=>handleAnswer(q.id,opt.value)}
+                onClick={()=>setAnswers(p=>({...p,[q.id]:opt.value}))}
                 className={`w-full p-4 rounded-xl font-semibold transition ${
                   answers[q.id]===opt.value
                     ? `bg-gradient-to-r ${opt.color} text-white shadow`
@@ -243,8 +247,26 @@
         </Card>
       );
 
+      const saveResultsAsJPG = async () => {
+        const node = document.getElementById('result-card');
+        await loadAllImagesIn(node); // 캡쳐 전 이미지 로딩 보장
+        const canvas = await html2canvas(node, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          allowTaint: false
+        });
+        const a = document.createElement('a');
+        a.download = 'career-result.jpg';
+        a.href = canvas.toDataURL('image/jpeg', 0.95);
+        a.click();
+      };
+
       const Results = () => {
-        const {topTypes, allScores, career} = results;
+        const {topTypes, allScores, career, code} = results;
+        const careerImg = assetUrl(`careers/${code}.jpg`);
+        const onImgError = (e)=>{ e.currentTarget.src = assetUrl('defaults/career.jpg'); };
+
         return (
           <Card>
             <div id="result-card">
@@ -253,6 +275,14 @@
                 <h1 className="text-3xl font-extrabold mb-1">검사 완료!</h1>
                 <p className="text-gray-600">당신만의 흥미 코드를 발견했어요</p>
               </div>
+
+              <img
+                src={careerImg}
+                onError={onImgError}
+                alt=""
+                className="asset w-full h-48 sm:h-56 rounded-2xl object-cover mb-6"
+                crossOrigin="anonymous"
+              />
 
               <div className="rounded-2xl border p-5 mb-6">
                 <h2 className="text-lg font-bold text-center mb-4">나의 흥미 코드 Top3</h2>
@@ -339,7 +369,7 @@
                 className="px-5 py-3 rounded-full font-bold text-white bg-gradient-to-r from-fuchsia-600 to-violet-600">
                 결과 JPG로 저장
               </button>
-              <button onClick={goIntro}
+              <button onClick={()=>{ setPage('intro'); setIdx(0); setAnswers({}); setResults(null); }}
                 className="px-5 py-3 rounded-full font-bold bg-white shadow hover:bg-gray-50">
                 처음으로
               </button>
@@ -358,9 +388,9 @@
     }
 
     ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
-    window.saveResultsAsJPG = () => {}; // 전역 충돌 방지 (실제 저장은 컴포넌트 onClick에서 수행)
   </script>
-  <!-- html2canvas: JSX 코드 아래에 둬도 무방 -->
+
+  <!-- html2canvas는 마지막에 로드 -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </body>
 </html>
