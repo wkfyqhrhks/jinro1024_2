@@ -1,15 +1,15 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>진로 관심사 설문조사</title>
 
-<!-- Pretendard (가독성 좋은 한국어 폰트) -->
+<!-- 폰트 -->
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://cdn.jsdelivr.net/npm/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
 
-<!-- html2canvas (JPEG 저장) -->
+<!-- html2canvas (JPEG 저장용) -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
@@ -35,48 +35,32 @@
     margin: 0 auto;
     padding: clamp(16px,3vw,28px);
   }
-  .intro, .survey, .results{
-    display:none;
-  }
-  .show{display:block}
+  /* 공통 섹션 크기 */
+  section.view{ display:none; }
+  section.view.show{ display:block; }
   .card{
     background:var(--card);
     border-radius: calc(var(--round) + 6px);
     box-shadow: 0 12px 38px rgba(16,24,40,.12);
     padding: clamp(16px,3vw,28px);
   }
+  .title{ font-size: clamp(22px, 3.4vw, 40px); font-weight: 800; margin: 0 0 .25rem; }
+  .subtitle{ color:var(--muted); margin:0 0 1.2rem; font-size:clamp(14px,2.2vw,18px) }
   .btn{
-    display:inline-flex; align-items:center; justify-content:center;
-    gap:.6rem; font-weight:700;
-    background: linear-gradient(90deg,#7c3aed,#ec4899);
-    color:#fff; padding:.95rem 1.35rem;
+    display:inline-flex; align-items:center; justify-content:center; gap:.6rem; font-weight:700;
+    background: linear-gradient(90deg,#7c3aed,#ec4899); color:#fff; padding:.95rem 1.35rem;
     border-radius:999px; border:0; cursor:pointer;
     box-shadow:0 8px 24px rgba(124,58,237,.35);
     transition: transform .08s ease, filter .1s ease;
   }
   .btn:active{ transform: translateY(1px); filter:brightness(.98) }
-  .btn.secondary{background:#f3f4f6; color:#374151; box-shadow:none}
-  .title{
-    font-size: clamp(22px, 3.4vw, 40px);
-    font-weight: 800;
-    margin: 0 0 .25rem;
-  }
-  .subtitle{color:var(--muted); margin:0 0 1.2rem; font-size:clamp(14px,2.2vw,18px)}
-  .grid{display:grid; gap:clamp(12px,1.8vw,16px)}
-  .grid.cols-2{grid-template-columns:1fr}
-  @media (min-width: 840px){
-    .grid.cols-2{grid-template-columns:1fr 1fr}
-  }
-  .pill{
-    display:inline-flex; align-items:center; gap:.4rem;
-    padding:.35rem .75rem; border-radius:999px;
-    background:#eef2ff; color:#4338ca; font-weight:700; font-size:14px;
-  }
-  .badge{
-    width:64px;height:64px;border-radius:16px;display:grid;place-items:center;
-    color:#fff;font-weight:800;font-size:28px;
-    filter: drop-shadow(0 6px 18px rgba(16,24,40,.20));
-  }
+  .btn.secondary{ background:#f3f4f6; color:#374151; box-shadow:none }
+  .center{text-align:center}
+  .grid{ display:grid; gap:clamp(12px,1.8vw,16px) }
+  .grid.cols-2{ grid-template-columns:1fr }
+  @media (min-width: 840px){ .grid.cols-2{ grid-template-columns:1fr 1fr } }
+  .pill{ display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .75rem; border-radius:999px; background:#eef2ff; color:#4338ca; font-weight:700; font-size:14px; }
+  .badge{ width:64px;height:64px;border-radius:16px;display:grid;place-items:center; color:#fff;font-weight:800;font-size:28px; filter: drop-shadow(0 6px 18px rgba(16,24,40,.20)); }
   .b-orange{background:#f59e0b}
   .b-green{background:#10b981}
   .b-purple{background:#8b5cf6}
@@ -89,13 +73,23 @@
   .bar>i{display:block;height:100%}
   .score-row{display:flex;align-items:center;gap:10px}
   .label{min-width:110px}
-  .center{text-align:center}
+
+  /* 설문 버튼 */
+  .opt{
+    width:100%; border:0; border-radius:14px; padding:14px 16px; text-align:left;
+    background:#f3f4f6; font-weight:700; cursor:pointer;
+  }
+  .opt.sel{ color:#fff; background: linear-gradient(90deg,#10b981,#22c55e); box-shadow:0 8px 22px rgba(16,185,129,.35) }
+  .navs{display:flex;justify-content:space-between;gap:8px;margin-top:12px}
+  .navs .btn{padding:.75rem 1.1rem}
+
   /* 캡처(저장) 래퍼: 흰 배경 + 여백 */
   .capture-wrap{
     background:#fff;
     border-radius: calc(var(--round) + 8px);
     padding: clamp(16px,2.2vw,24px);
   }
+
   /* 결과 헤더의 직업군 이미지 */
   .job-img{
     width:64px;height:64px;border-radius:14px;object-fit:cover;border:1px solid #eef2ff;
@@ -108,7 +102,7 @@
 <div class="container">
 
   <!-- 인트로 -->
-  <section id="intro" class="intro show">
+  <section id="intro" class="view show">
     <div class="card">
       <div class="title">진로 관심사 설문조사</div>
       <p class="subtitle">당신의 미래를 위한 첫 걸음</p>
@@ -128,33 +122,47 @@
     </div>
   </section>
 
-  <!-- 설문 (샘플: 실제 설문 화면은 기존 구현과 동일하게 붙여 쓰시면 됩니다) -->
-  <section id="survey" class="survey">
-    <div class="card center">
-      <div class="title">설문 진행 화면</div>
-      <p class="subtitle">여기에 기존 설문 UI를 그대로 배치하세요.</p>
-      <button class="btn" id="fakeFinish">결과 보기(데모)</button>
-      <p class="muted" style="margin-top:10px">※ 실제 연동 시 기존 설문 완료 시점에서 <code>showResults(demoResults)</code> 호출</p>
+  <!-- 설문 -->
+  <section id="survey" class="view">
+    <div class="card">
+      <div class="row" style="margin-bottom:10px">
+        <div class="muted" id="progressLabel">문항 1 / 36</div>
+        <div class="muted"><span id="answeredCount">0</span>개 응답</div>
+      </div>
+      <div class="bar" style="height:10px;margin-bottom:16px">
+        <i id="progressBar" style="width:0%;background:#8b5cf6"></i>
+      </div>
+
+      <div class="center" style="margin:12px 0 16px">
+        <div id="qTag" class="pill">분류</div>
+        <div id="qEmoji" style="font-size:52px;margin:8px 0">✨</div>
+        <h2 id="qText" class="title" style="font-size:24px"></h2>
+        <p id="qRole" class="muted" style="margin-top:4px">💼 캐릭터</p>
+      </div>
+
+      <div class="grid" id="optionsBox">
+        <!-- 옵션 버튼 5개가 주입됨 -->
+      </div>
+
+      <div class="navs">
+        <button class="btn secondary" id="prevBtn">← 이전</button>
+        <button class="btn" id="nextBtn">다음 →</button>
+      </div>
     </div>
   </section>
 
   <!-- 결과 -->
-  <section id="results" class="results">
-    <!-- 캡처(저장) 대상: 이 래퍼 기준으로 JPEG 저장됨 -->
+  <section id="results" class="view">
+    <!-- 캡처 대상 -->
     <div id="captureTarget" class="capture-wrap">
       <div class="card" style="margin-bottom:16px">
         <div class="row">
           <div>
-            <div class="title" style="display:flex;align-items:center; gap:.5rem">
-              <span>검사 완료!</span>
-            </div>
+            <div class="title">검사 완료!</div>
             <p class="subtitle">당신만의 흥미 코드를 발견했어요.</p>
           </div>
-          <!-- 직업군 카드(Top3) -->
-          <div class="row" style="gap:10px">
-            <div class="badge b-purple">A</div>
-            <div class="badge b-orange">E</div>
-            <div class="badge b-green">S</div>
+          <div class="row" id="topBadges" style="gap:10px">
+            <!-- A/E/S 배지 3개 주입 -->
           </div>
         </div>
       </div>
@@ -164,14 +172,12 @@
         <div class="card">
           <div class="row">
             <span class="pill">🎯 추천 진로</span>
-            <img id="jobImg" class="job-img" src="assets/IA.png" alt="직업군 이미지" />
+            <img id="jobImg" class="job-img" src="assets/IA.png" alt="직업군 이미지"/>
           </div>
-          <h2 id="careerTitle" style="margin:.6rem 0 1rem">브랜드 마케터/인플루언서</h2>
+          <h2 id="careerTitle" style="margin:.6rem 0 1rem"></h2>
 
           <h3 style="margin:.2rem 0 8px;">💼 관련 직업</h3>
-          <div id="jobList" class="grid" style="grid-template-columns:1fr 1fr">
-            <!-- JS로 채워짐 -->
-          </div>
+          <div id="jobList" class="grid" style="grid-template-columns:1fr 1fr"></div>
         </div>
 
         <!-- 필요 역량 + 로드맵 -->
@@ -196,7 +202,6 @@
       </div>
     </div>
 
-    <!-- 저장 버튼 -->
     <div class="center" style="margin-top:16px">
       <button class="btn" id="saveJpegBtn">결과를 JPEG로 저장</button>
       <button class="btn secondary" id="restartBtn">다시 시작</button>
@@ -205,140 +210,280 @@
 </div>
 
 <script>
-/* ------------------ 간단한 화면 전환 ------------------ */
-const $ = (s) => document.querySelector(s);
-const show = (id) => {
-  ['intro','survey','results'].forEach(k => $('#'+k).classList.remove('show'));
-  $('#'+id).classList.add('show');
+/* ===== 데이터: 질문 36문항 (RIASEC) ===== */
+const questions = [
+  // R
+  { id:1,  type:'R', text:'3D 프린터나 로봇과 같은 기계를 조작하여 결과물을 만드는 활동에 흥미를 느낀다.', emoji:'⚙️', character:'미래 엔지니어' },
+  { id:2,  type:'R', text:'직접 몸을 움직여 야외에서 식물을 기르거나 동물을 돌보는 활동을 즐긴다.', emoji:'🌱', character:'바이오 전문가' },
+  { id:3,  type:'R', text:'전선이나 기계 장치의 문제를 찾아내고 수리하는 일에 몰두한다.', emoji:'🔧', character:'유지보수 기술자' },
+  { id:4,  type:'R', text:'건축물이나 인테리어 모형을 설계·제작하는 작업이 재미있다.', emoji:'🏗️', character:'스마트 건설가' },
+  { id:5,  type:'R', text:'보안·소방·응급구조 등 신체 활동이 요구되는 일을 해보고 싶다.', emoji:'🚨', character:'안전 요원' },
+  { id:6,  type:'R', text:'VR 장비로 기계 작동 시뮬레이션을 경험하는 것이 좋다.', emoji:'🥽', character:'VR 트레이너' },
+  // I
+  { id:7,  type:'I', text:'데이터나 통계를 분석하여 숨겨진 규칙을 찾는 것에 흥미가 있다.', emoji:'📊', character:'빅데이터 분석가' },
+  { id:8,  type:'I', text:'심리·뇌 과학 등 복잡한 현상의 원리를 깊이 연구하고 싶다.', emoji:'🧠', character:'인지 과학자' },
+  { id:9,  type:'I', text:'실험/가설 검증으로 새로운 지식을 발견하는 것이 즐겁다.', emoji:'🔬', character:'연구원' },
+  { id:10, type:'I', text:'AI 알고리즘 오류 원인을 논리적으로 파헤치는 것을 좋아한다.', emoji:'🤖', character:'AI 디버거' },
+  { id:11, type:'I', text:'미래 사회 변화나 우주 등 미지의 영역에 대해 질문을 던진다.', emoji:'🔭', character:'미래학자' },
+  { id:12, type:'I', text:'논리 게임/추리 소설로 정보를 조합해 결론 내리기를 좋아한다.', emoji:'🔍', character:'논리학자' },
+  // A
+  { id:13, type:'A', text:'그림·음악·글쓰기 등으로 생각과 감정을 표현하는 것을 좋아한다.', emoji:'🎨', character:'멀티 아티스트' },
+  { id:14, type:'A', text:'디지털 드로잉/미디어 아트 등 기술 기반 예술에 관심이 많다.', emoji:'💻', character:'미디어 아티스트' },
+  { id:15, type:'A', text:'영상편집·웹툰·게임 스토리 등 콘텐츠 제작을 하고 싶다.', emoji:'🎬', character:'콘텐츠 크리에이터' },
+  { id:16, type:'A', text:'공연·패션·공간 디자인 등 미적 결과물에 매력을 느낀다.', emoji:'✨', character:'디자이너' },
+  { id:17, type:'A', text:'정해진 규칙 없이 자유로운 작업 환경을 선호한다.', emoji:'🦋', character:'자유 영혼' },
+  { id:18, type:'A', text:'대중에게 재미와 감동을 주는 창작물을 만들고 싶다.', emoji:'🎭', character:'감성 전달자' },
+  // S
+  { id:19, type:'S', text:'도움이 필요한 사람들을 위해 봉사하며 문제 해결에 보람을 느낀다.', emoji:'🤝', character:'사회 봉사자' },
+  { id:20, type:'S', text:'고민을 들어주고 정서적 지지를 해주는 역할이 편안하다.', emoji:'💬', character:'심리 상담가' },
+  { id:21, type:'S', text:'지식/기술을 재미있고 효과적으로 가르치는 방법을 연구한다.', emoji:'📚', character:'교육 코치' },
+  { id:22, type:'S', text:'보건·의료 분야에서 사람들의 건강과 회복을 돕고 싶다.', emoji:'⚕️', character:'헬스케어 전문가' },
+  { id:23, type:'S', text:'다양한 문화를 가진 사람들과 협력해 목표를 달성하는 것을 좋아한다.', emoji:'🌍', character:'글로벌 협력가' },
+  { id:24, type:'S', text:'온라인 커뮤니티 운영/의견 수렴/갈등 조정을 즐긴다.', emoji:'💻', character:'커뮤니티 매니저' },
+  // E
+  { id:25, type:'E', text:'새로운 사업 아이디어를 기획하고 설득하는 일을 잘한다.', emoji:'💡', character:'스타트업 CEO' },
+  { id:26, type:'E', text:'팀 리더로서 동기를 부여하고 이끄는 것을 좋아한다.', emoji:'👑', character:'카리스마 리더' },
+  { id:27, type:'E', text:'주식/부동산/가상화폐 등 투자 활동에 관심이 많다.', emoji:'💰', character:'핀테크 전문가' },
+  { id:28, type:'E', text:'발표/연설에 자신감이 있고 설득력을 높이려 고민한다.', emoji:'🎤', character:'협상가' },
+  { id:29, type:'E', text:'글로벌 트렌드를 읽고 비즈니스 기회를 찾고 싶다.', emoji:'🌐', character:'국제 비즈니스맨' },
+  { id:30, type:'E', text:'개인 브랜딩/소셜 미디어로 영향력을 키우는 걸 즐긴다.', emoji:'📱', character:'인플루언서' },
+  // C
+  { id:31, type:'C', text:'서류/DB를 분류하고 체계적으로 관리하는 일에 능숙하다.', emoji:'🗂️', character:'정보 관리자' },
+  { id:32, type:'C', text:'정해진 규칙과 절차에 따라 완벽히 처리할 때 만족한다.', emoji:'✅', character:'행정 전문가' },
+  { id:33, type:'C', text:'예산/재무 등 수치를 다루는 일을 좋아한다.', emoji:'💵', character:'회계사' },
+  { id:34, type:'C', text:'보안/개인정보 등 시스템의 안전성 확보에 책임감을 느낀다.', emoji:'🔒', character:'보안 전문가' },
+  { id:35, type:'C', text:'문서/보고서 포맷팅 등 정보를 깔끔하게 정리한다.', emoji:'📋', character:'기획 비서' },
+  { id:36, type:'C', text:'자동화 도구/업무관리 시스템으로 효율을 높인다.', emoji:'⚡', character:'업무 효율화 전문가' }
+];
+
+/* 추천 진로 데이터(주요 조합) */
+const careerPaths = {
+  'IA': { title:'AI 기반 콘텐츠 크리에이터',
+    jobs:['데이터 시각화 디자이너','UX 리서처','미디어 아티스트','AI 아트 디렉터'],
+    skills:['창의적 문제해결','데이터 리터러시','디자인 사고'],
+    roadmap:['고등학교 — 미술·정보·미디어','대학 — 융합디자인/데이터사이언스/미디어','경험 — 공모전/포트폴리오/디자인씽킹'] },
+  'IE': { title:'AI 스타트업 전략가',
+    jobs:['AI 기획자','테크 PM','비즈니스 애널리스트','디지털 컨설턴트'],
+    skills:['논리적 사고','비즈니스 감각','데이터 분석'],
+    roadmap:['고등학교 — 수학·AI기초·경제','대학 — 경영정보/컴공/산공','경험 — 창업동아리·BM 프로젝트·해커톤'] },
+  'AE': { title:'브랜드 마케터/인플루언서',
+    jobs:['디지털 마케터','브랜드 매니저','콘텐츠 기획자','SNS 전략가'],
+    skills:['창의성','커뮤니케이션','트렌드 분석'],
+    roadmap:['고등학교 — 화작·심리·사회문화','대학 — 광고홍보/문화콘텐츠/마케팅','경험 — SNS 운영·인턴십·브랜딩 프로젝트'] },
+  'SE': { title:'소셜 임팩트 리더',
+    jobs:['사회적기업가','CSR 매니저','비영리 기획자','임팩트 투자'],
+    skills:['공감능력','리더십','문제해결력'],
+    roadmap:['고등학교 — 사회문화·윤리·경제','대학 — 사회복지/경영/국제개발','경험 — 봉사 리딩·사회혁신 캠프·펀딩'] },
+  'RI': { title:'첨단 기술 연구자',
+    jobs:['로봇공학자','IoT 개발자','바이오 엔지니어','우주항공 기술자'],
+    skills:['기술적 이해','실험 설계','논리적 사고'],
+    roadmap:['고등학교 — 물리·화학·정보','대학 — 기계/전자/생명공학','경험 — 과동/발명/연구 프로젝트'] },
+  'RS': { title:'헬스케어 기술 전문가',
+    jobs:['의료기기 엔지니어','재활 치료사','스포츠 트레이너','응급구조사'],
+    skills:['신체 활동성','공감 능력','위기 대응'],
+    roadmap:['고등학교 — 생명과학·체육·보건','대학 — 의공학/물리치료/응급구조','경험 — 의료 봉사·응급처치·실습'] },
+  'IS': { title:'인간 중심 연구자',
+    jobs:['심리학자','교육 연구원','인지과학자','UX 리서처'],
+    skills:['분석력','공감 능력','연구 설계'],
+    roadmap:['고등학교 — 심리·사회문화·생명과학','대학 — 심리/교육/인지과학','경험 — 상담 봉사·연구 보조·사용자 조사'] },
+  'IC': { title:'데이터 사이언티스트',
+    jobs:['빅데이터 분석가','AI 엔지니어','정보보안 연구원','퀀트 애널리스트'],
+    skills:['데이터 분석','프로그래밍','논리적 사고'],
+    roadmap:['고등학교 — 수학·정보·통계','대학 — 통계/컴공/데이터사이언스','경험 — 데이터 공모전·부트캠프·오픈소스'] },
+  'AC': { title:'디지털 아카이브 전문가',
+    jobs:['큐레이터','디지털 아키비스트','콘텐츠 매니저','박물관 전문가'],
+    skills:['창의성','체계적 사고','디지털 리터러시'],
+    roadmap:['고등학교 — 미술·역사·정보','대학 — 문헌정보/박물관학/문화재','경험 — 전시 기획·아카이빙·답사'] },
+  'SC': { title:'행정 서비스 전문가',
+    jobs:['공무원','인사 담당자','행정사','비서'],
+    skills:['조직력','공감 능력','업무 처리'],
+    roadmap:['고등학교 — 사회·정치와법·경제','대학 — 행정/경영/법학','경험 — 학생회·행정 인턴·공모전'] },
+  'EC': { title:'금융 전략가',
+    jobs:['재무 분석가','투자 상담사','회계사','세무사'],
+    skills:['리더십','수리 능력','재무 분석'],
+    roadmap:['고등학교 — 경제·수학·정보','대학 — 경영/회계/금융','경험 — 모의투자·자격증·인턴십'] },
+  'RA': { title:'메이커 크리에이터',
+    jobs:['제품 디자이너','3D 모델러','건축가','인테리어 디자이너'],
+    skills:['기술적 능력','창의성','공간 감각'],
+    roadmap:['고등학교 — 미술·기술가정·물리','대학 — 산업디자인/건축/실내','경험 — 메이커·공모전·3D 프린팅'] },
+  'RC': { title:'스마트 시스템 운영자',
+    jobs:['설비/품질/생산 관리자','시스템 엔지니어'],
+    skills:['기술적 능력','체계적 사고','품질 관리'],
+    roadmap:['고등학교 — 기술가정·정보·수학','대학 — 산공/기계/전기','경험 — 현장 실습·자격증·자동화'] },
+  'RE': { title:'현장 리더',
+    jobs:['건설 현장 감독','물류 관리자','안전 관리자','스포츠 에이전트'],
+    skills:['신체 활동성','리더십','위기 관리'],
+    roadmap:['고등학교 — 체육·기술가정·경영','대학 — 건설/물류/안전공학','경험 — 현장 실습·안전 교육·PM'] }
 };
-$('#startBtn').addEventListener('click', () => show('survey'));
-$('#restartBtn')?.addEventListener('click', () => show('intro'));
 
-/* ------------------ 데모 결과(실제 설문 결과로 바꿔서 showResults 호출) ------------------ */
-const demoResults = {
-  // 상위 2개 조합 코드
-  code: 'AE',
-  // 추천 진로
-  career: {
-    title: '브랜드 마케터/인플루언서',
-    jobs: ['디지털 마케터','브랜드 매니저','콘텐츠 기획자','SNS 전략가'],
-    skills: ['창의성','커뮤니케이션','트렌드 분석'],
-    roadmap: [
-      '고등학교 단계 — 화작, 심리, 사회문화',
-      '대학 단계 — 광고홍보, 문화콘텐츠, 마케팅',
-      '경험 및 활동 — SNS 운영, 인턴십, 브랜딩 프로젝트'
-    ]
-  },
-  // 6유형 점수 (퍼센트)
-  scores: [
-    { key:'A', name:'예술형 (A)', color:'#ec4899', value:37 },
-    { key:'E', name:'진취형 (E)', color:'#f59e0b', value:33 },
-    { key:'S', name:'사회형 (S)', color:'#10b981', value:23 },
-    { key:'R', name:'실재형 (R)', color:'#60a5fa', value:20 },
-    { key:'I', name:'탐구형 (I)', color:'#a78bfa', value:27 },
-    { key:'C', name:'관습형 (C)', color:'#22c55e', value:20 }
-  ],
-};
-$('#fakeFinish').addEventListener('click', () => showResults(demoResults));
+/* ===== 상태 ===== */
+const $ = s => document.querySelector(s);
+const show = id => { ['intro','survey','results'].forEach(k=>$('#'+k).classList.remove('show')); $('#'+id).classList.add('show'); };
 
-/* ------------------ 결과 렌더링 ------------------ */
-function showResults(res){
-  // 추천 진로
-  $('#careerTitle').textContent = res.career.title;
+let current = 0;
+const answers = {}; // { qid: number(1~5) }
 
-  // 관련 직업
-  const jobList = $('#jobList');
-  jobList.innerHTML = '';
-  res.career.jobs.forEach(j=>{
-    const div = document.createElement('div');
-    div.className = 'chip';
-    div.textContent = j;
-    jobList.appendChild(div);
+$('#startBtn').addEventListener('click', () => {
+  current = 0;
+  renderQuestion();
+  show('survey');
+});
+$('#prevBtn').addEventListener('click', () => { current=Math.max(0,current-1); renderQuestion(); });
+$('#nextBtn').addEventListener('click', () => {
+  const q = questions[current];
+  if(answers[q.id]==null){ alert('선택해주세요.'); return; }
+  if(current<questions.length-1){ current++; renderQuestion(); }
+  else{ makeResults(); }
+});
+$('#restartBtn').addEventListener('click', ()=> show('intro'));
+
+/* ===== 설문 렌더링 ===== */
+function renderQuestion(){
+  const q = questions[current];
+
+  // 상단 정보
+  $('#progressLabel').textContent = `문항 ${current+1} / ${questions.length}`;
+  const answeredCount = Object.keys(answers).length;
+  $('#answeredCount').textContent = answeredCount;
+  $('#progressBar').style.width = `${((current+1)/questions.length)*100}%`;
+
+  $('#qTag').textContent = typeName(q.type);
+  $('#qEmoji').textContent = q.emoji;
+  $('#qText').textContent = q.text;
+  $('#qRole').textContent = `💼 ${q.character}`;
+
+  // 옵션
+  const opts = [
+    {v:5, t:'매우 그렇다'},
+    {v:4, t:'그렇다'},
+    {v:3, t:'보통이다'},
+    {v:2, t:'그렇지 않다'},
+    {v:1, t:'전혀 그렇지 않다'}
+  ];
+  const box = $('#optionsBox');
+  box.innerHTML = '';
+  opts.forEach(o=>{
+    const b = document.createElement('button');
+    b.className = 'opt' + ((answers[q.id]===o.v)?' sel':'');
+    b.textContent = `${o.t} (${o.v})`;
+    b.onclick = ()=>{ answers[q.id]=o.v; renderQuestion(); };
+    box.appendChild(b);
   });
 
-  // 필요 역량
-  const skillList = $('#skillList');
-  skillList.innerHTML = '';
-  res.career.skills.forEach(s=>{
-    const li = document.createElement('li');
-    li.textContent = s;
-    skillList.appendChild(li);
-  });
+  // 이전/다음 버튼 상태
+  $('#prevBtn').disabled = (current===0);
+  $('#nextBtn').textContent = (current===questions.length-1)?'결과 보기 →':'다음 →';
+}
+function typeName(t){
+  return ({
+    R:'실재형 (R)', I:'탐구형 (I)', A:'예술형 (A)',
+    S:'사회형 (S)', E:'진취형 (E)', C:'관습형 (C)'
+  })[t] || t;
+}
 
-  // 로드맵
-  const roadmapList = $('#roadmapList');
-  roadmapList.innerHTML = '';
-  res.career.roadmap.forEach(r=>{
-    const li = document.createElement('li');
-    li.textContent = r;
-    roadmapList.appendChild(li);
-  });
+/* ===== 결과 계산/표시 ===== */
+function makeResults(){
+  // 점수 합산
+  const scores = {R:0,I:0,A:0,S:0,E:0,C:0};
+  questions.forEach(q=>{ if(answers[q.id]) scores[q.type]+=answers[q.id]; });
 
-  // 타입 배지(상단 3개) — 이미 배치는 되어 있으나 값 바꾸고 싶으면 여기서 변경 가능
+  // 정렬 + 퍼센트(최대 30점 기준)
+  const all = Object.entries(scores)
+    .map(([type,score])=>({type,score,percent: Math.round(score/30*100)}))
+    .sort((a,b)=>b.score-a.score);
 
-  // 점수 바
-  const scoreList = $('#scoreList');
-  scoreList.innerHTML = '';
-  res.scores.forEach(sc=>{
-    const row = document.createElement('div');
-    row.className = 'score-row';
-    row.innerHTML = `
-      <div class="label"><b>${sc.name}</b></div>
-      <div class="bar" style="flex:1"><i style="width:${sc.value}%; background:${sc.color}"></i></div>
-      <div style="width:46px;text-align:right"><b>${sc.value}%</b></div>
-    `;
-    scoreList.appendChild(row);
-  });
+  const top3 = all.slice(0,3);
+  const code = top3[0].type + top3[1].type;
 
-  // 직업군 이미지 (assets/XX.png). 코드 조합이 없거나 파일이 없으면 IA.png 폴백
-  const jobImg = $('#jobImg');
-  const primary = (res.code || 'IA').toUpperCase().replace(/[^A-Z]/g,'');
-  const imgPathCandidate = `assets/${primary}.png`;
-  jobImg.src = imgPathCandidate;
-  jobImg.onerror = () => { jobImg.src = 'assets/IA.png'; };
+  // 추천 진로 선택 (양방향/폴백)
+  let career = careerPaths[code] || careerPaths[code.split('').reverse().join('')];
+  if(!career){
+    const fallback = ['IA','IE','RI','IS','IC','AE','SE'].find(c=>c.includes(top3[0].type));
+    career = careerPaths[fallback || 'IA'];
+  }
 
+  // 결과 렌더
+  renderResults({all, top3, code, career});
   show('results');
 }
 
-/* ------------------ iOS 감지 ------------------ */
-function isIOS(){
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
-
-/* ------------------ JPEG 저장 ------------------ */
-async function saveAsJPEG(){
-  const node = document.getElementById('captureTarget');
-
-  // 캡처 옵션: 흰 배경 + 선명도 향상
-  const canvas = await html2canvas(node, {
-    backgroundColor: '#ffffff',
-    scale: Math.min(window.devicePixelRatio || 1, 2), // 과도한 용량 방지
-    useCORS: true,
-    allowTaint: true
+function renderResults(res){
+  // 탑 배지
+  const colors = {A:'b-purple', E:'b-orange', S:'b-green', R:'b-green', I:'b-purple', C:'b-orange'};
+  const wrap = $('#topBadges'); wrap.innerHTML = '';
+  res.top3.forEach(t=>{
+    const d = document.createElement('div');
+    d.className = `badge ${colors[t.type]||'b-purple'}`;
+    d.textContent = t.type;
+    wrap.appendChild(d);
   });
 
-  const mime = 'image/jpeg';
-  const quality = 0.92;
-  const dataUrl = canvas.toDataURL(mime, quality);
+  // 직업군 이미지 (assets/코드.png) → 없으면 IA.png 폴백
+  const primaryCode = (res.code||'IA').toUpperCase().replace(/[^A-Z]/g,'');
+  const img = $('#jobImg');
+  img.src = `assets/${primaryCode}.png`;
+  img.onerror = ()=> img.src = 'assets/IA.png';
+
+  // 제목
+  $('#careerTitle').textContent = res.career.title;
+
+  // 관련 직업
+  const jobList = $('#jobList'); jobList.innerHTML = '';
+  res.career.jobs.forEach(j=>{
+    const d = document.createElement('div'); d.className='chip'; d.textContent=j; jobList.appendChild(d);
+  });
+
+  // 필요 역량
+  const skillList = $('#skillList'); skillList.innerHTML='';
+  res.career.skills.forEach(s=>{ const li=document.createElement('li'); li.textContent=s; skillList.appendChild(li); });
+
+  // 로드맵
+  const roadmapList = $('#roadmapList'); roadmapList.innerHTML='';
+  res.career.roadmap.forEach(r=>{ const li=document.createElement('li'); li.textContent=r; roadmapList.appendChild(li); });
+
+  // 점수 막대
+  const scoreList = $('#scoreList'); scoreList.innerHTML='';
+  const colorMap = {A:'#ec4899',E:'#f59e0b',S:'#10b981',R:'#60a5fa',I:'#a78bfa',C:'#22c55e'};
+  res.all.forEach(sc=>{
+    const row = document.createElement('div');
+    row.className='score-row';
+    row.innerHTML = `
+      <div class="label"><b>${typeName(sc.type)}</b></div>
+      <div class="bar" style="flex:1"><i style="width:${sc.percent}%;background:${colorMap[sc.type]||'#8b5cf6'}"></i></div>
+      <div style="width:46px;text-align:right"><b>${sc.percent}%</b></div>`;
+    scoreList.appendChild(row);
+  });
+}
+
+/* ===== JPEG 저장 (iOS/안드/데스크톱 대응) ===== */
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+async function saveAsJPEG(){
+  const node = document.getElementById('captureTarget');
+  const canvas = await html2canvas(node, {
+    backgroundColor:'#ffffff',
+    scale: Math.min(window.devicePixelRatio||1, 2), // 과도한 용량 방지
+    useCORS: true, allowTaint: true
+  });
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
 
   if(isIOS()){
-    // iOS Safari: download 불가 → 새 탭에 열어 길게 눌러 저장
     const w = window.open();
     if(w){
       w.document.write(`<html><head><title>결과 저장</title></head>
-        <body style="margin:0;background:#fff;display:grid;place-items:center;">
+      <body style="margin:0;background:#fff;display:grid;place-items:center">
         <img src="${dataUrl}" style="max-width:100%;height:auto"/>
         <p style="font:14px/1.4 Pretendard,sans-serif;color:#444;margin:12px">
           이미지를 길게 눌러 “사진에 저장”을 선택하세요.
         </p>
-        </body></html>`);
+      </body></html>`);
       w.document.close();
     }else{
-      alert('팝업이 차단되었습니다. 주소창 오른쪽에서 팝업 허용 후 다시 시도해주세요.');
+      alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.');
     }
   }else{
-    // 데스크톱/안드: 직접 다운로드
     const a = document.createElement('a');
     a.href = dataUrl;
     a.download = 'career-result.jpg';
