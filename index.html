@@ -98,8 +98,13 @@
 
   #captureArea{position:relative}
 
-  /* 오프스크린 캡처 컨테이너(실제 화면에 보이지 않음) */
-  .offscreen-capture{ position:fixed; left:-9999px; top:0; width:1080px; background:#fff; padding:32px; box-sizing:border-box; pointer-events:none; opacity:0; }
+  /* 오프스크린 캡처 컨테이너 숨김 */
+  .offscreen-capture{
+    position:fixed; left:-9999px; top:0; width:1080px;
+    padding:32px; box-sizing:border-box;
+    background:#ffffff;
+    pointer-events:none; opacity:0;
+  }
 </style>
 </head>
 <body>
@@ -329,7 +334,7 @@ const careerPaths = {
        jobs:['건설 감독','물류 관리자','안전 관리자','스포츠 에이전트'],
        roadmap:{high:'체육, 가정, 경영', college:'건설·물류·안전공학', experience:'현장 실습, 안전 교육, PM'},
        skills:['신체 활동성','리더십','위기 관리'], growth:72 },
-};
+}
 
 /** 상태 */
 let idx = 0;
@@ -385,7 +390,7 @@ function renderQuestion(){
       b.classList.add('active');
       answers[q.id] = o.v;
       nextBtn.disabled = false;
-    };
+    }
     choicesWrap.appendChild(b);
   });
 
@@ -461,60 +466,70 @@ function calcAndRenderResult(){
   });
 }
 
-/** JPEG 저장 (오프스크린 캡처 + 1080px 기준폭 + 32px 여백 + iOS 폴백) */
-saveJpg.onclick = async () => {
-  const source = document.getElementById('captureArea');
+/** JPEG 저장(여백 + 이미지로드 보장 + iOS 폴백 + 고정폭 1080) */
+saveJpg.onclick = async ()=>{
+  const target = document.getElementById('captureArea');
 
-  // 화면에 보이지 않는 오프스크린 컨테이너 생성
-  const offscreen = document.createElement('div');
-  offscreen.className = 'offscreen-capture';
+  // 1) 캡처 내부 이미지 로드 대기
+  const imgs = target.querySelectorAll('img');
+  await Promise.all(Array.from(imgs).map(img => {
+    if (img.complete) return Promise.resolve();
+    return new Promise(res => { img.onload = img.onerror = res; });
+  }));
+  await new Promise(res => requestAnimationFrame(res)); // 렌더 프레임 안정화
 
-  // 캡처 대상 복제(현재 상태 그대로)
-  const clone = source.cloneNode(true);
-  offscreen.appendChild(clone);
-  document.body.appendChild(offscreen);
+  // 2) 화면 밖 복제본 생성 (여백 32px, 폭 1080px)
+  const clone = target.cloneNode(true);
+  const off = document.createElement('div');
+  off.className = 'offscreen-capture';
+  off.appendChild(clone);
+  document.body.appendChild(off);
 
-  // 캡처 수행 (실제 화면 레이아웃에 영향 없음)
-  const canvas = await html2canvas(offscreen, {
-    backgroundColor: '#ffffff',
-    scale: 2,
-    useCORS: true,
-    windowWidth: 1080
-  });
+  try{
+    const canvas = await html2canvas(off, {
+      backgroundColor:'#ffffff',
+      useCORS:true,
+      scale:2,
+      windowWidth:1080,
+      scrollX:0,
+      scrollY:0
+    });
 
-  // 오프스크린 제거
-  document.body.removeChild(offscreen);
+    const dataURL = canvas.toDataURL('image/jpeg', 0.92);
 
-  // JPEG 데이터
-  const dataURL = canvas.toDataURL('image/jpeg', 0.92);
+    // 3) 기본 다운로드
+    const a = document.createElement('a');
+    a.href = dataURL;
+    a.download = 'career-result.jpg';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 
-  // 기본 다운로드 (데스크톱/안드로이드)
-  const a = document.createElement('a');
-  a.href = dataURL;
-  a.download = 'career-result.jpg';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  // iOS Safari 폴백 (새 탭으로 이미지 열어 저장 유도)
-  const ua = navigator.userAgent || navigator.vendor || window.opera;
-  const isIOS = /iPad|iPhone|iPod/.test(ua);
-  if (isIOS) {
-    setTimeout(() => {
-      const w = window.open();
-      if (w) {
-        w.document.title = '길게 눌러 “사진에 추가”';
-        w.document.body.style.margin = '0';
-        const img = new Image();
-        img.src = dataURL;
-        img.style.width = '100%';
-        img.style.height = 'auto';
-        w.document.body.appendChild(img);
-      }
-    }, 150);
+    // 4) iOS Safari 폴백
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const isIOS = /iPad|iPhone|iPod/.test(ua);
+    if (isIOS) {
+      setTimeout(() => {
+        const w = window.open();
+        if (w) {
+          w.document.title = '길게 눌러 “사진에 추가”';
+          w.document.body.style.margin = '0';
+          const img = new Image();
+          img.src = dataURL;
+          img.style.width = '100%';
+          img.style.height = 'auto';
+          w.document.body.appendChild(img);
+        }
+      }, 200);
+    }
+  } catch(e){
+    console.error('JPEG 저장 오류:', e);
+    alert('이미지 저장 중 오류가 발생했어요.');
+  } finally {
+    // 5) 정리
+    document.body.removeChild(off);
   }
 };
 </script>
 </body>
 </html>
-
