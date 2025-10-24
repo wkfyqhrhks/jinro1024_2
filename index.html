@@ -10,9 +10,8 @@
   <!-- React 18 -->
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- html2canvas for JPG export -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- Babel (런타임 트랜스파일) -->
+  <script src="https://unpkg.com/@babel/standalone@7.26.2/babel.min.js"></script>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top);
@@ -31,10 +30,10 @@
 <body class="font-sans text-gray-900 antialiased">
   <div id="app" class="px-4 sm:px-6 md:px-8 py-6 sm:py-10"></div>
 
-  <script type="text/babel">
+  <!-- 앱 코드 -->
+  <script type="text/babel" data-presets="env,react">
     const {useState} = React;
 
-    /* ================= 데이터 ================= */
     const typeInfo = {
       R:{name:'실재형',color:'bg-blue-500'},
       I:{name:'탐구형',color:'bg-purple-500'},
@@ -45,52 +44,46 @@
     };
 
     const questions = [
-      // R
       { id:1,type:'R',text:'3D 프린터나 로봇과 같은 기계를 조작하여 결과물을 만드는 활동에 흥미를 느낀다.',emoji:'⚙️',character:'미래 엔지니어'},
       { id:2,type:'R',text:'직접 몸을 움직여 야외에서 식물을 기르거나 동물을 돌보는 활동을 즐긴다.',emoji:'🌱',character:'바이오 전문가'},
       { id:3,type:'R',text:'복잡하게 얽힌 전선이나 기계 장치의 문제를 찾아내고 수리하는 일에 몰두한다.',emoji:'🔧',character:'유지보수 기술자'},
       { id:4,type:'R',text:'실제 건축물이나 인테리어 모형을 설계하고 제작하는 작업이 재미있다.',emoji:'🏗️',character:'스마트 건설가'},
       { id:5,type:'R',text:'보안·소방·응급구조 등 신체 활동이 요구되는 일을 하고 싶다.',emoji:'🚨',character:'안전 요원'},
       { id:6,type:'R',text:'VR 장비로 기계 작동 시뮬레이션을 경험하는 것이 좋다.',emoji:'🥽',character:'VR 트레이너'},
-      // I
       { id:7,type:'I',text:'데이터/통계를 분석해 숨겨진 규칙을 찾는 것에 흥미가 있다.',emoji:'📊',character:'빅데이터 분석가'},
       { id:8,type:'I',text:'심리·뇌과학 등 복잡한 원리를 깊이 연구하고 싶다.',emoji:'🧠',character:'인지 과학자'},
       { id:9,type:'I',text:'과학 실험과 가설 검증을 통해 지식을 발견하는 것이 즐겁다.',emoji:'🔬',character:'연구원'},
       { id:10,type:'I',text:'AI 오류 원인을 논리적으로 파헤치고 해결하는 과정을 좋아한다.',emoji:'🤖',character:'AI 디버거'},
-      { id:11,type:'I',text:'미래 사회 변화/우주 신비 등 미지의 영역에 질문을 던진다.',emoji:'🔭',character:'미래학자'},
-      { id:12,type:'I',text:'논리 게임/추리로 정보를 조합하고 결론을 내리는 활동을 좋아한다.',emoji:'🔍',character:'논리학자'},
-      // A
-      { id:13,type:'A',text:'그림·음악·글쓰기 등 창의적으로 생각/감정을 표현하는 것을 좋아한다.',emoji:'🎨',character:'멀티 아티스트'},
-      { id:14,type:'A',text:'디지털 드로잉/미디어아트 등 기술을 활용한 예술 활동에 관심이 많다.',emoji:'💻',character:'미디어 아티스트'},
+      { id:11,type:'I',text:'미래 변화/우주 신비 등 미지의 영역에 질문을 던진다.',emoji:'🔭',character:'미래학자'},
+      { id:12,type:'I',text:'논리 게임/추리로 정보를 조합하고 결론을 내린다.',emoji:'🔍',character:'논리학자'},
+      { id:13,type:'A',text:'그림·음악·글쓰기 등 창의적으로 표현하는 것을 좋아한다.',emoji:'🎨',character:'멀티 아티스트'},
+      { id:14,type:'A',text:'디지털 드로잉/미디어아트 등 기술을 활용한 예술에 관심이 많다.',emoji:'💻',character:'미디어 아티스트'},
       { id:15,type:'A',text:'영상 편집, 웹툰, 게임 스토리 등 문화 콘텐츠 제작을 하고 싶다.',emoji:'🎬',character:'콘텐츠 크리에이터'},
-      { id:16,type:'A',text:'공연, 패션, 공간 디자인 등 시각/청각적 아름다움 창출에 매력을 느낀다.',emoji:'✨',character:'디자이너'},
-      { id:17,type:'A',text:'정해진 규칙 없이 자유롭고 개성 있는 작업 환경을 선호한다.',emoji:'🦋',character:'자유 영혼'},
-      { id:18,type:'A',text:'대중에게 재미와 감동을 주는 창작물이 만드는 것이 목표다.',emoji:'🎭',character:'감성 전달자'},
-      // S
-      { id:19,type:'S',text:'취약계층을 돕고 문제를 해결해주는 일에 보람을 느낀다.',emoji:'🤝',character:'사회 봉사자'},
-      { id:20,type:'S',text:'주변의 고민을 듣고 정서적으로 지지하는 역할이 편안하다.',emoji:'💬',character:'심리 상담가'},
-      { id:21,type:'S',text:'지식/기술을 재미있고 효과적으로 가르치는 방법을 연구한다.',emoji:'📚',character:'교육 코치'},
-      { id:22,type:'S',text:'의료/보건 분야에서 건강과 회복을 돕는 일을 하고 싶다.',emoji:'⚕️',character:'헬스케어 전문가'},
-      { id:23,type:'S',text:'다양한 문화와 협력해 공동 목표를 달성하는 활동을 좋아한다.',emoji:'🌍',character:'글로벌 협력가'},
-      { id:24,type:'S',text:'온라인 커뮤니티 운영, 의견 수렴, 갈등 조정을 즐긴다.',emoji:'💻',character:'커뮤니티 매니저'},
-      // E
+      { id:16,type:'A',text:'공연·패션·공간 디자인에 매력을 느낀다.',emoji:'✨',character:'디자이너'},
+      { id:17,type:'A',text:'정해진 규칙 없이 자유로운 작업 환경을 선호한다.',emoji:'🦋',character:'자유 영혼'},
+      { id:18,type:'A',text:'대중에게 감동을 주는 창작물이 목표다.',emoji:'🎭',character:'감성 전달자'},
+      { id:19,type:'S',text:'도움을 필요로 하는 사람들을 돕는 일에 보람을 느낀다.',emoji:'🤝',character:'사회 봉사자'},
+      { id:20,type:'S',text:'주변의 고민을 듣고 정서적 지지를 해주는 역할이 편안하다.',emoji:'💬',character:'심리 상담가'},
+      { id:21,type:'S',text:'지식/기술을 효과적으로 가르치는 방법을 연구한다.',emoji:'📚',character:'교육 코치'},
+      { id:22,type:'S',text:'의료/보건 분야에서 건강과 회복을 돕고 싶다.',emoji:'⚕️',character:'헬스케어 전문가'},
+      { id:23,type:'S',text:'다양한 문화와 협력해 공동 목표를 달성하는 것을 좋아한다.',emoji:'🌍',character:'글로벌 협력가'},
+      { id:24,type:'S',text:'온라인 커뮤니티 운영과 갈등 조정을 즐긴다.',emoji:'💻',character:'커뮤니티 매니저'},
       { id:25,type:'E',text:'새로운 사업/제품을 기획하고 설득해 판매하는 일을 잘한다.',emoji:'💡',character:'스타트업 CEO'},
-      { id:26,type:'E',text:'팀에서 리더 역할로 동기를 부여하고 이끄는 것을 좋아한다.',emoji:'👑',character:'카리스마 리더'},
-      { id:27,type:'E',text:'투자/재테크 등 경제적 이익을 창출하는 활동에 관심이 많다.',emoji:'💰',character:'핀테크 전문가'},
+      { id:26,type:'E',text:'팀 리더로 동기를 부여하고 이끄는 것을 좋아한다.',emoji:'👑',character:'카리스마 리더'},
+      { id:27,type:'E',text:'투자/재테크 등 경제 활동에 관심이 많다.',emoji:'💰',character:'핀테크 전문가'},
       { id:28,type:'E',text:'발표/연설에 자신 있고 설득력을 높이는 법을 고민한다.',emoji:'🎤',character:'협상가'},
-      { id:29,type:'E',text:'글로벌 트렌드를 파악하고 새로운 비즈니스 기회를 찾고 싶다.',emoji:'🌐',character:'국제 비즈니스맨'},
+      { id:29,type:'E',text:'글로벌 트렌드를 파악하고 비즈니스 기회를 찾고 싶다.',emoji:'🌐',character:'국제 비즈니스맨'},
       { id:30,type:'E',text:'개인 브랜딩/소셜미디어로 영향력을 키우는 활동을 즐긴다.',emoji:'📱',character:'인플루언서'},
-      // C
-      { id:31,type:'C',text:'복잡한 서류/DB를 분류하고 체계적으로 관리하는 일에 능숙하다.',emoji:'🗂️',character:'정보 관리자'},
-      { id:32,type:'C',text:'정해진 절차에 따라 업무를 완벽히 처리할 때 만족한다.',emoji:'✅',character:'행정 전문가'},
-      { id:33,type:'C',text:'재무/예산 등 숫자 다루는 일을 좋아한다.',emoji:'💵',character:'회계사'},
-      { id:34,type:'C',text:'정보보안·개인정보 보호 등 시스템 안전성 확보에 책임감을 느낀다.',emoji:'🔒',character:'보안 전문가'},
-      { id:35,type:'C',text:'문서 작성과 포맷팅 등 정보를 깔끔하게 정리한다.',emoji:'📋',character:'기획 비서'},
-      { id:36,type:'C',text:'자동화 도구/업무 관리 시스템으로 효율을 높이는 방법을 찾는다.',emoji:'⚡',character:'업무 효율화 전문가'},
+      { id:31,type:'C',text:'서류/DB를 체계적으로 분류·관리하는 일에 능숙하다.',emoji:'🗂️',character:'정보 관리자'},
+      { id:32,type:'C',text:'정해진 절차대로 완벽히 처리할 때 만족감을 느낀다.',emoji:'✅',character:'행정 전문가'},
+      { id:33,type:'C',text:'재무/예산 등 숫자를 다루는 일을 좋아한다.',emoji:'💵',character:'회계사'},
+      { id:34,type:'C',text:'정보보안·개인정보 보호 등 안전성 확보에 책임감을 느낀다.',emoji:'🔒',character:'보안 전문가'},
+      { id:35,type:'C',text:'문서 작성과 포맷팅을 깔끔하게 정리한다.',emoji:'📋',character:'기획 비서'},
+      { id:36,type:'C',text:'자동화 도구로 업무 효율을 높이는 방법을 찾는다.',emoji:'⚡',character:'업무 효율화 전문가'},
     ];
 
     const careerPaths = {
-      IA:{title:'AI 기반 콘텐츠 크리에이터',jobs:['데이터 시각화 디자이너','UX 리서처','미디어 아티스트','AI 아트 디렉터'],roadmap:{high:'미술, 정보, 미디어 교과 선택',college:'융합디자인, 데이터사이언스, 미디어 커뮤니케이션',experience:'UI/UX 공모전, 포트폴리오, 디자인 씽킹 워크숍'},skills:['창의적 문제해결','데이터 리터러시','디자인 사고'],growth:85},
+      IA:{title:'AI 기반 콘텐츠 크리에이터',jobs:['데이터 시각화 디자이너','UX 리서처','미디어 아티스트','AI 아트 디렉터'],roadmap:{high:'미술, 정보, 미디어 교과 선택',college:'융합디자인, 데이터사이언스, 미디어 커뮤니케이션',experience:'UI/UX 공모전, 포트폴리오, 디자인 씽킹'},skills:['창의적 문제해결','데이터 리터러시','디자인 사고'],growth:85},
       IE:{title:'AI 스타트업 전략가',jobs:['AI 기획자','테크 PM','비즈니스 애널리스트','디지털 컨설턴트'],roadmap:{high:'수학, AI 기초, 경제',college:'경영정보, 컴공, 산업공학',experience:'창업 동아리, BM 프로젝트, 해커톤'},skills:['논리적 사고','비즈니스 감각','데이터 분석'],growth:92},
       AE:{title:'브랜드 마케터/인플루언서',jobs:['디지털 마케터','브랜드 매니저','콘텐츠 기획자','SNS 전략가'],roadmap:{high:'화작, 심리, 사회문화',college:'광고홍보, 문화콘텐츠, 마케팅',experience:'SNS 운영, 마케팅 인턴, 브랜딩 프로젝트'},skills:['창의성','커뮤니케이션','트렌드 분석'],growth:78},
       SE:{title:'소셜 임팩트 리더',jobs:['사회적기업가','CSR 매니저','비영리 기획자','임팩트 투자'],roadmap:{high:'사회문화, 윤리, 경제',college:'사회복지, 경영, 국제개발',experience:'봉사 리딩, 사회혁신 캠프, 크라우드펀딩'},skills:['공감','리더십','문제해결'],growth:73},
@@ -107,7 +100,6 @@
       RE:{title:'현장 리더',jobs:['건설 감독','물류 관리자','안전 관리자','스포츠 에이전트'],roadmap:{high:'체육, 기술가정, 경영',college:'건설/물류/안전공학',experience:'현장 실습, 안전 교육, PM'},skills:['신체 활동','리더십','위기 관리'],growth:72},
     };
 
-    /* ================= 유틸 (저장) ================= */
     async function saveResultsAsJPG(){
       const node = document.getElementById('result-card');
       const canvas = await html2canvas(node, {scale:2, backgroundColor:'#ffffff'});
@@ -117,12 +109,11 @@
       link.click();
     }
 
-    /* ================= App ================= */
     function App(){
-      const [page, setPage] = useState('intro');   // 'intro' | 'survey' | 'results'
-      const [idx, setIdx] = useState(0);
-      const [answers, setAnswers] = useState({});
-      const [results, setResults] = useState(null);
+      const [page, setPage] = React.useState('intro');
+      const [idx, setIdx] = React.useState(0);
+      const [answers, setAnswers] = React.useState({});
+      const [results, setResults] = React.useState(null);
 
       const goSurvey = () => { setPage('survey'); setIdx(0); window.scrollTo({top:0,behavior:'smooth'}); };
       const goIntro  = () => { setPage('intro'); setIdx(0); setAnswers({}); setResults(null); window.scrollTo({top:0}); };
@@ -147,7 +138,6 @@
         window.scrollTo({top:0,behavior:'smooth'});
       };
 
-      /* 공통 카드 래퍼: 화면 크기/여백 통일 */
       const Card = ({children}) => (
         <div className="page-wrap mx-auto">
           <div className="export-surface bg-white/95 backdrop-blur rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10">
@@ -156,7 +146,6 @@
         </div>
       );
 
-      /* ===== Intro ===== */
       const Intro = () => (
         <Card>
           <div className="flex items-center gap-4 mb-6">
@@ -186,10 +175,10 @@
         </Card>
       );
 
-      /* ===== Survey ===== */
       const q = questions[idx];
       const progress = Math.round(((idx+1)/questions.length)*100);
       const answered = answers[q?.id] !== undefined;
+
       const Survey = () => (
         <Card>
           <div className="mb-4 flex items-center justify-between">
@@ -254,7 +243,6 @@
         </Card>
       );
 
-      /* ===== Results ===== */
       const Results = () => {
         const {topTypes, allScores, career} = results;
         return (
@@ -343,15 +331,15 @@
                     </div>
                   </div>
                 </div>
-              </div> <!-- /result-card inner -->
-            </div> <!-- /result-card -->
+              </div>
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <button onclick="saveResultsAsJPG()"
+              <button onClick={saveResultsAsJPG}
                 className="px-5 py-3 rounded-full font-bold text-white bg-gradient-to-r from-fuchsia-600 to-violet-600">
                 결과 JPG로 저장
               </button>
-              <button onClick={()=>{setPage('intro'); setIdx(0); setAnswers({}); setResults(null);}}
+              <button onClick={goIntro}
                 className="px-5 py-3 rounded-full font-bold bg-white shadow hover:bg-gray-50">
                 처음으로
               </button>
@@ -370,8 +358,9 @@
     }
 
     ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
-    // 브라우저 전역 접근을 위해 저장 함수 노출
-    window.saveResultsAsJPG = saveResultsAsJPG;
+    window.saveResultsAsJPG = () => {}; // 전역 충돌 방지 (실제 저장은 컴포넌트 onClick에서 수행)
   </script>
+  <!-- html2canvas: JSX 코드 아래에 둬도 무방 -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </body>
 </html>
